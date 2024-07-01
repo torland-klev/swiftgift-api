@@ -1,23 +1,48 @@
 package klev
 
+import io.github.cdimascio.dotenv.dotenv
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import klev.plugins.configureDatabases
+import klev.db.users.UserService
+import klev.db.users.google.GoogleUserService
 import klev.plugins.configureHTTP
 import klev.plugins.configureRouting
 import klev.plugins.configureSecurity
 import klev.plugins.configureSerialization
+import org.jetbrains.exposed.sql.Database
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
+val applicationHttpClient =
+    HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json()
+        }
+    }
+
+val env = dotenv()
+val database =
+    Database.connect(
+        url = env["DB_URL"],
+        user = env["DB_USER"],
+        driver = env["DB_DRIVER"],
+        password = env["DB_PASSWORD"],
+    )
+
+val googleUserService = GoogleUserService(database)
+val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
+
 fun Application.module() {
-    configureSecurity()
+    configureSecurity(httpClient = applicationHttpClient, userService = userService)
     configureHTTP()
     configureSerialization()
-    configureDatabases()
     configureRouting()
 }
