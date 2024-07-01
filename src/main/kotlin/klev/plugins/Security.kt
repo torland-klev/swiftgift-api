@@ -59,7 +59,7 @@ fun Application.configureSecurity(
             authenticate { tokenCredential ->
                 val user = userService.getUserByToken(tokenCredential)
                 if (user != null) {
-                    UserIdPrincipal(user.email)
+                    UserIdPrincipal(user.id.toString())
                 } else {
                     null
                 }
@@ -100,7 +100,10 @@ fun Application.configureSecurity(
         }
         authenticate("auth-bearer") {
             get("/bearer") {
-                call.respondText("Hello, ${call.principal<UserIdPrincipal>()?.name}!")
+                call.respondText(
+                    "Hello, ${call.principal<UserIdPrincipal>()?.name?.toIntOrNull()
+                        ?.let { userService.read(it) }?.email}!",
+                )
             }
         }
         authenticate("auth-oauth-google") {

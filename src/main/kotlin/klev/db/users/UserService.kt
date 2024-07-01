@@ -36,7 +36,7 @@ class UserService(
             }[Users.id]
         }
 
-    private suspend fun read(id: Int): User? =
+    suspend fun read(id: Int): User? =
         dbQuery {
             Users
                 .select { Users.id eq id }

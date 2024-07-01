@@ -10,6 +10,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import klev.db.users.UserService
 import klev.db.users.google.GoogleUserService
+import klev.db.wishes.WishesService
 import klev.plugins.configureHTTP
 import klev.plugins.configureRouting
 import klev.plugins.configureSecurity
@@ -39,10 +40,11 @@ val database =
 
 val googleUserService = GoogleUserService(database)
 val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
+val wishesService = WishesService(database = database)
 
 fun Application.module() {
     configureSecurity(httpClient = applicationHttpClient, userService = userService)
     configureHTTP()
     configureSerialization()
-    configureRouting()
+    configureRouting(wishesService = wishesService)
 }
