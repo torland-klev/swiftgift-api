@@ -5,7 +5,6 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.principal
-import io.ktor.server.html.respondHtml
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -17,20 +16,12 @@ import klev.db.wishes.Occasion
 import klev.db.wishes.PartialWish
 import klev.db.wishes.Status
 import klev.db.wishes.WishesService
-import kotlinx.html.a
-import kotlinx.html.body
-import kotlinx.html.p
+import klev.mainHtml
 
 fun Application.configureRouting(wishesService: WishesService) {
     routing {
         get("/") {
-            call.respondHtml {
-                body {
-                    p {
-                        a("/login") { +"Login with Google" }
-                    }
-                }
-            }
+            mainHtml()
         }
         get("/home") {
             val userSession = getSession(call)
