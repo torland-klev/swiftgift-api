@@ -63,6 +63,7 @@ class WishesRoutes(
                         occasion = occasion,
                         description = partialWish.description,
                         url = partialWish.url,
+                        img = partialWish.img,
                     ),
                 ),
             )

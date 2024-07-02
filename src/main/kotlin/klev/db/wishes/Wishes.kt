@@ -7,4 +7,5 @@ object Wishes : UserTable() {
     val status = varchar("status", 15)
     val url = varchar("url", 255).nullable()
     val description = varchar("description", 511).nullable()
+    val img = varchar("img", 255).nullable()
 }

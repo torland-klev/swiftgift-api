@@ -8,4 +8,5 @@ data class PartialWish(
     val url: String? = null,
     val description: String? = null,
     val status: String? = null,
+    val img: String? = null,
 )

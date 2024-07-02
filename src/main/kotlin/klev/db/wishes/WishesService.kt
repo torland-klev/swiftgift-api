@@ -2,6 +2,7 @@ package klev.db.wishes
 
 import klev.db.UserCRUD
 import klev.db.wishes.Wishes.description
+import klev.db.wishes.Wishes.img
 import klev.db.wishes.Wishes.occasion
 import klev.db.wishes.Wishes.status
 import klev.db.wishes.Wishes.updated
@@ -25,6 +26,7 @@ class WishesService(
         statement[status] = Status.OPEN.name
         statement[description] = obj.description
         statement[url] = obj.url
+        statement[img] = obj.img
     }
 
     override fun readMap(input: ResultRow): Wish =
@@ -35,6 +37,7 @@ class WishesService(
             url = input[url],
             occasion = Occasion.valueOf(input[occasion]),
             status = Status.valueOf(input[status]),
+            img = input[img],
         )
 
     override fun updateMap(
@@ -46,6 +49,7 @@ class WishesService(
         update[status] = obj.status.name
         update[description] = obj.description
         update[url] = obj.url
+        update[img] = obj.img
         update[updated] = CurrentTimestamp()
     }
 
@@ -70,6 +74,7 @@ class WishesService(
                     status = status ?: existing.status,
                     url = partial.url ?: existing.url,
                     description = partial.description ?: existing.description,
+                    img = partial.img ?: existing.img,
                 ),
             )
         }

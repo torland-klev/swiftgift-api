@@ -10,4 +10,5 @@ data class Wish(
     val status: Status = Status.OPEN,
     val url: String?,
     val description: String?,
+    val img: String?,
 )
