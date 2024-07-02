@@ -9,9 +9,11 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
 class UserService(
     database: Database,
@@ -64,7 +66,9 @@ class UserService(
     }
 
     private suspend fun GoogleUser.toUser(token: String) =
-        getUserFromGoogleUser(this) ?: read(
+        getUserFromGoogleUser(this)?.also {
+            updateAuthToken(this, token)
+        } ?: read(
             create(
                 User(
                     id = 0,
@@ -82,6 +86,18 @@ class UserService(
                 }
             },
         )!!
+
+    private suspend fun updateAuthToken(
+        googleUser: GoogleUser,
+        token: String,
+    ) {
+        dbQuery {
+            UsersToGoogleUsers.update({ UsersToGoogleUsers.googleUserId eq googleUser.id }) {
+                it[authToken] = token
+                it[updated] = CurrentTimestamp()
+            }
+        }
+    }
 
     suspend fun createOrUpdate(
         session: UserSession,
