@@ -20,8 +20,7 @@ class UserService(
 ) {
     init {
         transaction(database) {
-            SchemaUtils.create(Users)
-            SchemaUtils.create(UsersToGoogleUsers)
+            SchemaUtils.createMissingTablesAndColumns(Users, UsersToGoogleUsers)
         }
     }
 

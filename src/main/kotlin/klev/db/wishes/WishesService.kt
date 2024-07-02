@@ -13,7 +13,7 @@ class WishesService(
 ) {
     init {
         transaction(database) {
-            SchemaUtils.create(Wishes)
+            SchemaUtils.createMissingTablesAndColumns(Wishes)
         }
     }
 
