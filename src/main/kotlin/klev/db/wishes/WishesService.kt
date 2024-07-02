@@ -1,72 +1,90 @@
 package klev.db.wishes
 
-import kotlinx.coroutines.Dispatchers
+import klev.db.UserCRUD
+import klev.db.wishes.Wishes.description
+import klev.db.wishes.Wishes.occasion
+import klev.db.wishes.Wishes.status
+import klev.db.wishes.Wishes.updated
+import klev.db.wishes.Wishes.url
+import klev.db.wishes.Wishes.userId
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 
 class WishesService(
     database: Database,
-) {
-    init {
-        transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Wishes)
+) : UserCRUD<Wish>(database, Wishes) {
+    override fun createMap(
+        statement: InsertStatement<Number>,
+        obj: Wish,
+    ) {
+        statement[userId] = obj.userId
+        statement[occasion] = obj.occasion.name
+        statement[status] = Status.OPEN.name
+        statement[description] = obj.description
+        statement[url] = obj.url
+    }
+
+    override fun readMap(input: ResultRow): Wish =
+        Wish(
+            id = input[Wishes.id].value,
+            userId = input[Wishes.userId],
+            description = input[description],
+            url = input[url],
+            occasion = Occasion.valueOf(input[occasion]),
+            status = Status.valueOf(input[status]),
+        )
+
+    override fun updateMap(
+        update: UpdateStatement,
+        obj: Wish,
+    ) {
+        update[userId] = obj.userId
+        update[occasion] = obj.occasion.name
+        update[status] = obj.status.name
+        update[description] = obj.description
+        update[url] = obj.url
+        update[updated] = CurrentTimestamp()
+    }
+
+    override suspend fun all(userId: Int?) = super.all(userId).filterNot { it.status == Status.DELETED }
+
+    suspend fun update(
+        id: Int?,
+        userId: Int?,
+        partial: PartialWish,
+    ): Wish? {
+        val existing = read(id, userId)
+        return if (existing == null) {
+            null
+        } else {
+            val occasion = partial.occasion?.let { Occasion.valueOf(it.uppercase()) }
+            val status = partial.status?.let { Status.valueOf(it.uppercase()) }
+            update(
+                id,
+                userId,
+                existing.copy(
+                    occasion = occasion ?: existing.occasion,
+                    status = status ?: existing.status,
+                    url = partial.url ?: existing.url,
+                    description = partial.description ?: existing.description,
+                ),
+            )
         }
     }
 
-    private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
-
-    suspend fun read(id: Int) =
-        dbQuery {
-            Wishes
-                .select { Wishes.id eq id }
-                .map {
-                    Wish(
-                        id = id,
-                        userId = it[Wishes.userId],
-                        description = it[Wishes.description],
-                        url = it[Wishes.url],
-                        occasion = Occasion.valueOf(it[Wishes.occasion]),
-                        status = Status.valueOf(it[Wishes.status]),
-                    )
-                }.singleOrNull()
-        }
-
-    suspend fun create(
-        userId: Int,
-        occasion: Occasion,
-        description: String?,
-        url: String?,
-    ) = read(
-        dbQuery {
-            Wishes.insert {
-                it[this.userId] = userId
-                it[this.occasion] = occasion.name
-                it[status] = Status.OPEN.name
-                it[this.description] = description
-                it[this.url] = url
-            }[Wishes.id]
-        },
-    )!!
-
-    suspend fun all(userId: Int?) =
-        if (userId == null) {
-            emptyList()
+    override suspend fun delete(
+        id: Int?,
+        userId: Int?,
+    ): Int {
+        val existing = read(id, userId)
+        return if (existing == null) {
+            0
         } else {
-            dbQuery {
-                Wishes.select { Wishes.userId eq userId }.map {
-                    Wish(
-                        id = it[Wishes.id],
-                        userId = userId,
-                        description = it[Wishes.description],
-                        url = it[Wishes.url],
-                        occasion = Occasion.valueOf(it[Wishes.occasion]),
-                        status = Status.valueOf(it[Wishes.status]),
-                    )
-                }
-            }
+            update(id, userId, existing.copy(status = Status.DELETED))
+            1
         }
+    }
 }

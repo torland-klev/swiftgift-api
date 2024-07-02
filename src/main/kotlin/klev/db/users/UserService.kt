@@ -30,11 +30,13 @@ class UserService(
 
     private suspend fun create(user: User): Int =
         dbQuery {
-            Users.insert {
-                it[firstName] = user.firstName
-                it[lastName] = user.lastName
-                it[email] = user.email
-            }[Users.id]
+            Users
+                .insert {
+                    it[firstName] = user.firstName
+                    it[lastName] = user.lastName
+                    it[email] = user.email
+                }[Users.id]
+                .value
         }
 
     suspend fun read(id: Int): User? =

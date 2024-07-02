@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PartialWish(
-    val occasion: String?,
-    val url: String?,
-    val description: String?,
+    val occasion: String? = null,
+    val url: String? = null,
+    val description: String? = null,
+    val status: String? = null,
 )

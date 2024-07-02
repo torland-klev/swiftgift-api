@@ -10,6 +10,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import klev.db.users.UserService
 import klev.db.users.google.GoogleUserService
+import klev.db.wishes.WishesRoutes
 import klev.db.wishes.WishesService
 import klev.plugins.configureHTTP
 import klev.plugins.configureRouting
@@ -46,5 +47,5 @@ fun Application.module() {
     configureSecurity(httpClient = applicationHttpClient, userService = userService)
     configureHTTP()
     configureSerialization()
-    configureRouting(wishesService = wishesService)
+    configureRouting(wishesRoutes = WishesRoutes(wishesService = wishesService))
 }
