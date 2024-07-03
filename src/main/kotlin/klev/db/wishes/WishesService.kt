@@ -8,6 +8,7 @@ import klev.db.wishes.Wishes.status
 import klev.db.wishes.Wishes.updated
 import klev.db.wishes.Wishes.url
 import klev.db.wishes.Wishes.userId
+import klev.db.wishes.Wishes.visibility
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
@@ -22,22 +23,24 @@ class WishesService(
         obj: Wish,
     ) {
         statement[userId] = obj.userId
-        statement[occasion] = obj.occasion.name
-        statement[status] = Status.OPEN.name
+        statement[occasion] = obj.occasion
+        statement[status] = Status.OPEN
         statement[description] = obj.description
         statement[url] = obj.url
         statement[img] = obj.img
+        statement[visibility] = obj.visibility
     }
 
-    override fun readMap(input: ResultRow): Wish =
+    override suspend fun readMap(input: ResultRow): Wish =
         Wish(
             id = input[Wishes.id].value,
             userId = input[Wishes.userId],
             description = input[description],
             url = input[url],
-            occasion = Occasion.valueOf(input[occasion]),
-            status = Status.valueOf(input[status]),
+            occasion = input[occasion],
+            status = input[status],
             img = input[img],
+            visibility = input[visibility],
         )
 
     override fun updateMap(
@@ -45,15 +48,18 @@ class WishesService(
         obj: Wish,
     ) {
         update[userId] = obj.userId
-        update[occasion] = obj.occasion.name
-        update[status] = obj.status.name
+        update[occasion] = obj.occasion
+        update[status] = obj.status
         update[description] = obj.description
         update[url] = obj.url
         update[img] = obj.img
+        update[visibility] = obj.visibility
         update[updated] = CurrentTimestamp()
     }
 
     override suspend fun all(userId: Int?) = super.all(userId).filterNot { it.status == Status.DELETED }
+
+    override suspend fun publicPrivacyFilter(input: Wish) = input.visibility == WishVisibility.PUBLIC
 
     suspend fun update(
         id: Int?,

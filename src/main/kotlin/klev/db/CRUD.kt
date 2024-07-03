@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -25,7 +26,7 @@ abstract class CRUD<T>(
         }
     }
 
-    protected abstract fun readMap(input: ResultRow): T
+    protected abstract suspend fun readMap(input: ResultRow): T
 
     protected abstract fun updateMap(
         update: UpdateStatement,
@@ -37,11 +38,18 @@ abstract class CRUD<T>(
         obj: T,
     )
 
+    open suspend fun all() =
+        dbQuery {
+            table.selectAll().map { readMap(it) }.filter { publicPrivacyFilter(it) }
+        }
+
+    abstract suspend fun publicPrivacyFilter(input: T): Boolean
+
     open suspend fun read(id: Int) =
         dbQuery {
             table
                 .select { table.id eq id }
-                .map(::readMap)
+                .map { readMap(it) }
                 .singleOrNull()
         }
 

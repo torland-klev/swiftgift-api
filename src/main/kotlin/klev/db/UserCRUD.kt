@@ -16,7 +16,7 @@ abstract class UserCRUD<T>(
             emptyList()
         } else {
             dbQuery {
-                table.select { table.userId eq userId }.map(::readMap)
+                table.select { table.userId eq userId }.map { readMap(it) }
             }
         }
 
@@ -34,7 +34,7 @@ abstract class UserCRUD<T>(
         null
     } else {
         dbQuery {
-            table.select { (table.userId eq userId) and (table.id eq id) }.map(::readMap).singleOrNull()
+            table.select { (table.userId eq userId) and (table.id eq id) }.map { readMap(it) }.singleOrNull()
         }
     }
 

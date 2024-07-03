@@ -11,4 +11,5 @@ data class Wish(
     val url: String?,
     val description: String?,
     val img: String?,
+    val visibility: WishVisibility = WishVisibility.PRIVATE,
 )

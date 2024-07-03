@@ -56,6 +56,7 @@ class WishesRoutes(
         call.principal<UserIdPrincipal>()?.name?.toIntOrNull()?.let { userId ->
             val partialWish = call.receive<PartialWish>()
             val occasion = partialWish.occasion?.let { Occasion.valueOf(it.uppercase()) } ?: Occasion.NONE
+            val visibility = partialWish.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE
             call.respond(
                 wishesService.create(
                     Wish(
@@ -64,6 +65,7 @@ class WishesRoutes(
                         description = partialWish.description,
                         url = partialWish.url,
                         img = partialWish.img,
+                        visibility = visibility,
                     ),
                 ),
             )
@@ -71,6 +73,11 @@ class WishesRoutes(
     }
 
     suspend fun all(call: ApplicationCall) {
-        call.respond(wishesService.all(call.principal<UserIdPrincipal>()?.name?.toIntOrNull()))
+        val wishes = wishesService.all() + wishesService.all(call.principal<UserIdPrincipal>()?.name?.toIntOrNull())
+        call.respond(wishes.toSet())
+    }
+
+    suspend fun allPublic(call: ApplicationCall) {
+        call.respond(HttpStatusCode.OK, wishesService.all())
     }
 }

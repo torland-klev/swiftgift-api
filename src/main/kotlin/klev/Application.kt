@@ -8,6 +8,9 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import klev.db.groups.GroupMembershipService
+import klev.db.groups.GroupService
+import klev.db.groups.GroupsRoutes
 import klev.db.users.UserService
 import klev.db.users.google.GoogleUserService
 import klev.db.wishes.WishesRoutes
@@ -32,7 +35,6 @@ val applicationHttpClient =
         }
     }
 
-
 val database =
     Database.connect(
         url = env["DB_URL"],
@@ -44,10 +46,17 @@ val database =
 val googleUserService = GoogleUserService(database)
 val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 val wishesService = WishesService(database = database)
+val groupService = GroupService(database = database, groupMembershipService = GroupMembershipService(database), userService = userService)
 
 fun Application.module() {
-    configureSecurity(httpClient = applicationHttpClient, userService = userService)
+    configureSecurity(
+        httpClient = applicationHttpClient,
+        userService = userService,
+    )
     configureHTTP()
     configureSerialization()
-    configureRouting(wishesRoutes = WishesRoutes(wishesService = wishesService))
+    configureRouting(
+        wishesRoutes = WishesRoutes(wishesService = wishesService),
+        groupsRoutes = GroupsRoutes(groupService = groupService),
+    )
 }
