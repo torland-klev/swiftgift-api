@@ -66,7 +66,7 @@ fun Application.configureSecurity(
             }
         }
         oauth("auth-oauth-google") {
-            urlProvider = { "http://localhost:8080/callback" }
+            urlProvider = { env["GOOGLE_CALLBACK_URL"] }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",

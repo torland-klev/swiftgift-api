@@ -18,8 +18,10 @@ import klev.plugins.configureSecurity
 import klev.plugins.configureSerialization
 import org.jetbrains.exposed.sql.Database
 
+val env = dotenv()
+
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = env["PORT"].toInt(), host = env["HOST"], module = Application::module)
         .start(wait = true)
 }
 
@@ -30,7 +32,7 @@ val applicationHttpClient =
         }
     }
 
-val env = dotenv()
+
 val database =
     Database.connect(
         url = env["DB_URL"],
