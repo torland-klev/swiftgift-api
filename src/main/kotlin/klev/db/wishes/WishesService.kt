@@ -57,7 +57,7 @@ class WishesService(
         update[updated] = CurrentTimestamp()
     }
 
-    override suspend fun all(userId: Int?) = super.all(userId).filterNot { it.status == Status.DELETED }
+    override suspend fun allOwnedByUser(userId: Int?) = super.allOwnedByUser(userId).filterNot { it.status == Status.DELETED }
 
     override suspend fun publicPrivacyFilter(input: Wish) = input.visibility == WishVisibility.PUBLIC
 

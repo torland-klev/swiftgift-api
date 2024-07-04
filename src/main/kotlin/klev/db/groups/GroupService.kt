@@ -6,17 +6,17 @@ import klev.db.groups.Groups.name
 import klev.db.groups.Groups.updated
 import klev.db.groups.Groups.visibility
 import klev.db.users.UserService
-import klev.userService
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 
 class GroupService(
     database: Database,
-    groupMembershipService: GroupMembershipService,
-    userService: UserService,
+    private val groupMembershipService: GroupMembershipService,
+    private val userService: UserService,
 ) : CRUD<Group>(database, Groups) {
     override suspend fun readMap(input: ResultRow): Group {
         val userId = input[createdBy]
@@ -45,5 +45,36 @@ class GroupService(
         update[updated] = CurrentTimestamp()
     }
 
-    suspend fun all(userId: Int?) = all().filterNot { it.createdBy.id == userId }
+    override suspend fun create(obj: Group): Group {
+        val group = super.create(obj)
+        groupMembershipService.create(
+            GroupMembership(
+                groupId = group.id,
+                userId = group.createdBy.id,
+                role = GroupMembershipRole.OWNER,
+            ),
+        )
+        return group
+    }
+
+    suspend fun allCreatedByUser(userId: Int?) =
+        if (userId == null) {
+            emptyList()
+        } else {
+            dbQuery {
+                Groups.select { createdBy eq userId }.map { readMap(it) }
+            } 
+        }
+
+    suspend fun getIfHasReadAccess(
+        groupId: Int?,
+        userId: Int?,
+    ): Group? =
+        if (groupId == null || userId == null) {
+            null
+        } else if (groupMembershipService.isMember(userId, groupId)) {
+            read(groupId)
+        } else {
+            null
+        }
 }

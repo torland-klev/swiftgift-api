@@ -2,17 +2,17 @@ package klev.db.wishes
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.auth.UserIdPrincipal
-import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import klev.oauthUserId
+import klev.routeId
 
 class WishesRoutes(
     private val wishesService: WishesService,
 ) {
     suspend fun patch(call: ApplicationCall) {
-        val id = call.parameters["id"]?.toIntOrNull()
-        val userId = call.principal<UserIdPrincipal>()?.name?.toIntOrNull()
+        val id = call.routeId()
+        val userId = call.oauthUserId()
         val partialWish = call.receive<PartialWish>()
         val updated = wishesService.update(id, userId, partialWish)
         if (updated != null) {
@@ -23,8 +23,8 @@ class WishesRoutes(
     }
 
     suspend fun delete(call: ApplicationCall) {
-        val id = call.parameters["id"]?.toIntOrNull()
-        val userId = call.principal<UserIdPrincipal>()?.name?.toIntOrNull()
+        val id = call.routeId()
+        val userId = call.oauthUserId()
         if (userId == null) {
             call.respond(HttpStatusCode.Unauthorized)
         } else if (id == null) {
@@ -42,8 +42,8 @@ class WishesRoutes(
     suspend fun getId(call: ApplicationCall) {
         val found =
             wishesService.read(
-                id = call.parameters["id"]?.toIntOrNull(),
-                userId = call.principal<UserIdPrincipal>()?.name?.toIntOrNull(),
+                id = call.routeId(),
+                userId = call.oauthUserId(),
             )
         if (found != null) {
             call.respond(HttpStatusCode.OK, found)
@@ -53,11 +53,12 @@ class WishesRoutes(
     }
 
     suspend fun post(call: ApplicationCall) {
-        call.principal<UserIdPrincipal>()?.name?.toIntOrNull()?.let { userId ->
+        call.oauthUserId()?.let { userId ->
             val partialWish = call.receive<PartialWish>()
             val occasion = partialWish.occasion?.let { Occasion.valueOf(it.uppercase()) } ?: Occasion.NONE
             val visibility = partialWish.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE
             call.respond(
+                HttpStatusCode.Created,
                 wishesService.create(
                     Wish(
                         userId = userId,
@@ -69,15 +70,12 @@ class WishesRoutes(
                     ),
                 ),
             )
-        }
+        } ?: call.respond(HttpStatusCode.Unauthorized)
     }
 
-    suspend fun all(call: ApplicationCall) {
-        val wishes = wishesService.all() + wishesService.all(call.principal<UserIdPrincipal>()?.name?.toIntOrNull())
+    suspend fun allUserHasReadAccessTo(call: ApplicationCall) {
+        val wishes = wishesService.allPublic() + wishesService.allOwnedByUser(call.oauthUserId())
+        // TODO: Group wishes
         call.respond(wishes.toSet())
-    }
-
-    suspend fun allPublic(call: ApplicationCall) {
-        call.respond(HttpStatusCode.OK, wishesService.all())
     }
 }

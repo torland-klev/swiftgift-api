@@ -12,6 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import klev.db.groups.GroupsRoutes
+import klev.db.users.UserRoutes
 import klev.db.wishes.Occasion
 import klev.db.wishes.Status
 import klev.db.wishes.WishesRoutes
@@ -20,6 +21,7 @@ import klev.mainHtml
 fun Application.configureRouting(
     wishesRoutes: WishesRoutes,
     groupsRoutes: GroupsRoutes,
+    userRoutes: UserRoutes,
 ) {
     routing {
         get("/") {
@@ -37,21 +39,36 @@ fun Application.configureRouting(
         get("/wishes/occasion") {
             call.respond(Occasion.entries.map { it.name })
         }
-        get("/wishes") {
-            wishesRoutes.allPublic(call)
-        }
-        get("/groups") {
-            groupsRoutes.allPublic(call)
-        }
         authenticate("auth-bearer") {
             route("/groups") {
                 get {
                     groupsRoutes.all(call)
                 }
+                post {
+                    groupsRoutes.post(call)
+                }
+                route("/{id}") {
+                    get {
+                        groupsRoutes.get(call)
+                    }
+                    delete {
+                        groupsRoutes.deleteIfOwner(call)
+                    }
+                }
+            }
+            route("/users") {
+                get {
+                    userRoutes.get(call)
+                }
+                route("/{id}") {
+                    get {
+                        userRoutes.getById(call)
+                    }
+                }
             }
             route("/wishes") {
                 get {
-                    wishesRoutes.all(call)
+                    wishesRoutes.allUserHasReadAccessTo(call)
                 }
                 post {
                     wishesRoutes.post(call)

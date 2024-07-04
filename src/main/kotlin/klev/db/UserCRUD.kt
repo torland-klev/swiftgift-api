@@ -11,7 +11,7 @@ abstract class UserCRUD<T>(
     database: Database,
     private val table: UserTable,
 ) : CRUD<T>(database, table) {
-    open suspend fun all(userId: Int?) =
+    open suspend fun allOwnedByUser(userId: Int?) =
         if (userId == null) {
             emptyList()
         } else {

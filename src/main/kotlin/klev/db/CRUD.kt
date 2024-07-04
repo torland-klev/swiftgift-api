@@ -38,19 +38,23 @@ abstract class CRUD<T>(
         obj: T,
     )
 
-    open suspend fun all() =
+    open suspend fun allPublic() =
         dbQuery {
             table.selectAll().map { readMap(it) }.filter { publicPrivacyFilter(it) }
         }
 
     abstract suspend fun publicPrivacyFilter(input: T): Boolean
 
-    open suspend fun read(id: Int) =
-        dbQuery {
-            table
-                .select { table.id eq id }
-                .map { readMap(it) }
-                .singleOrNull()
+    open suspend fun read(id: Int?) =
+        if (id == null) {
+            null
+        } else {
+            dbQuery {
+                table
+                    .select { table.id eq id }
+                    .map { readMap(it) }
+                    .singleOrNull()
+            }
         }
 
     open suspend fun update(
@@ -67,7 +71,7 @@ abstract class CRUD<T>(
         return read(id)
     }
 
-    suspend fun create(obj: T) =
+    open suspend fun create(obj: T) =
         read(
             dbQuery {
                 table

@@ -33,6 +33,7 @@ import klev.db.users.UserAndSession
 import klev.db.users.UserProvider
 import klev.db.users.UserService
 import klev.db.users.UserSession
+import klev.oauthUserId
 
 fun Application.configureSecurity(
     httpClient: HttpClient,
@@ -101,7 +102,7 @@ fun Application.configureSecurity(
         authenticate("auth-bearer") {
             get("/bearer") {
                 call.respondText(
-                    "Hello, ${call.principal<UserIdPrincipal>()?.name?.toIntOrNull()
+                    "Hello, ${call.oauthUserId()
                         ?.let { userService.read(it) }?.email}!",
                 )
             }
