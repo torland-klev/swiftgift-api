@@ -1,7 +1,7 @@
 package klev.db
 
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -15,10 +15,11 @@ import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import java.util.UUID
 
 abstract class CRUD<T>(
     database: Database,
-    private val table: IntIdTable,
+    private val table: UUIDTable,
 ) {
     init {
         transaction(database) {
@@ -45,7 +46,7 @@ abstract class CRUD<T>(
 
     abstract suspend fun publicPrivacyFilter(input: T): Boolean
 
-    open suspend fun read(id: Int?) =
+    open suspend fun read(id: UUID?) =
         if (id == null) {
             null
         } else {
@@ -58,7 +59,7 @@ abstract class CRUD<T>(
         }
 
     open suspend fun update(
-        id: Int,
+        id: UUID,
         obj: T,
     ): T? {
         dbQuery {
@@ -82,7 +83,7 @@ abstract class CRUD<T>(
             },
         )!!
 
-    open suspend fun delete(id: Int) =
+    open suspend fun delete(id: UUID) =
         dbQuery {
             table.deleteWhere { table.id eq id } > 0
         }

@@ -11,9 +11,10 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import klev.db.groups.GroupMembershipService
 import klev.db.groups.GroupService
 import klev.db.groups.GroupsRoutes
+import klev.db.groups.groupsToWishes.GroupsToWishesService
+import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserRoutes
 import klev.db.users.UserService
 import klev.db.users.google.GoogleUserService
@@ -24,6 +25,7 @@ import klev.plugins.configureRouting
 import klev.plugins.configureSecurity
 import klev.plugins.configureSerialization
 import org.jetbrains.exposed.sql.Database
+import java.util.UUID
 
 val env = dotenv()
 
@@ -49,13 +51,25 @@ val database =
 
 private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
-private val wishesService = WishesService(database = database)
+private val groupsToWishesService = GroupsToWishesService(database = database)
 private val groupMembershipService = GroupMembershipService(database)
+private val wishesService =
+    WishesService(database = database, groupsToWishesService = groupsToWishesService, groupMembershipService = groupMembershipService)
 private val groupService = GroupService(database = database, groupMembershipService = groupMembershipService, userService = userService)
 
-fun ApplicationCall.oauthUserId() = principal<UserIdPrincipal>()?.name?.toIntOrNull()
+fun ApplicationCall.oauthUserId() =
+    try {
+        principal<UserIdPrincipal>()?.name?.let { UUID.fromString(it) }
+    } catch (e: IllegalArgumentException) {
+        null
+    }
 
-fun ApplicationCall.routeId() = parameters["id"]?.toIntOrNull()
+fun ApplicationCall.routeId() =
+    try {
+        parameters["id"]?.let { UUID.fromString(it) }
+    } catch (e: IllegalArgumentException) {
+        null
+    }
 
 fun Application.module() {
     configureSecurity(

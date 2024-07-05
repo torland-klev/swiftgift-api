@@ -1,4 +1,4 @@
-package klev.db.groups
+package klev.db.groups.memberships
 
 enum class GroupMembershipRole {
     OWNER,

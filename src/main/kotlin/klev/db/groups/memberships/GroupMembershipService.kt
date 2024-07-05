@@ -1,15 +1,16 @@
-package klev.db.groups
+package klev.db.groups.memberships
 
 import klev.db.UserCRUD
-import klev.db.groups.GroupMemberships.groupId
-import klev.db.groups.GroupMemberships.role
-import klev.db.groups.GroupMemberships.userId
+import klev.db.groups.memberships.GroupMemberships.groupId
+import klev.db.groups.memberships.GroupMemberships.role
+import klev.db.groups.memberships.GroupMemberships.userId
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import java.util.UUID
 
 class GroupMembershipService(
     database: Database,
@@ -42,15 +43,15 @@ class GroupMembershipService(
     }
 
     suspend fun isMember(
-        userId: Int,
-        groupId: Int,
+        userId: UUID,
+        groupId: UUID,
     ) = dbQuery {
         GroupMemberships.select { (GroupMemberships.userId eq userId) and (GroupMemberships.groupId eq groupId) }.count()
     } > 0
 
     suspend fun isOwner(
-        userId: Int,
-        groupId: Int,
+        userId: UUID,
+        groupId: UUID,
     ) = dbQuery {
         GroupMemberships
             .select {

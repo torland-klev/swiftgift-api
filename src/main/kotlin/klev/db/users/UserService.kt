@@ -14,6 +14,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import java.util.UUID
 
 class UserService(
     database: Database,
@@ -28,7 +29,7 @@ class UserService(
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    private suspend fun create(user: User): Int =
+    private suspend fun create(user: User): UUID =
         dbQuery {
             Users
                 .insert {
@@ -39,7 +40,7 @@ class UserService(
                 .value
         }
 
-    suspend fun read(id: Int): User? =
+    suspend fun read(id: UUID): User? =
         dbQuery {
             Users
                 .select { Users.id eq id }
@@ -73,7 +74,6 @@ class UserService(
         } ?: read(
             create(
                 User(
-                    id = 0,
                     firstName = givenName,
                     lastName = familyName,
                     email = email,

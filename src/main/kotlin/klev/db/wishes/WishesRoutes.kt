@@ -55,27 +55,19 @@ class WishesRoutes(
     suspend fun post(call: ApplicationCall) {
         call.oauthUserId()?.let { userId ->
             val partialWish = call.receive<PartialWish>()
-            val occasion = partialWish.occasion?.let { Occasion.valueOf(it.uppercase()) } ?: Occasion.NONE
-            val visibility = partialWish.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE
+
             call.respond(
                 HttpStatusCode.Created,
-                wishesService.create(
-                    Wish(
-                        userId = userId,
-                        occasion = occasion,
-                        description = partialWish.description,
-                        url = partialWish.url,
-                        img = partialWish.img,
-                        visibility = visibility,
-                    ),
-                ),
+                wishesService.createByPartial(partial = partialWish, userId = userId),
             )
         } ?: call.respond(HttpStatusCode.Unauthorized)
     }
 
     suspend fun allUserHasReadAccessTo(call: ApplicationCall) {
-        val wishes = wishesService.allPublic() + wishesService.allOwnedByUser(call.oauthUserId())
-        // TODO: Group wishes
+        val wishes =
+            wishesService.allPublic() +
+                wishesService.allOwnedByUser(call.oauthUserId()) +
+                wishesService.allUserHasGroupAccessTo(call.oauthUserId())
         call.respond(wishes.toSet())
     }
 }

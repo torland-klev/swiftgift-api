@@ -1,10 +1,10 @@
 package klev.db.users
 
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-object Users : IntIdTable() {
+object Users : UUIDTable() {
     val firstName = varchar("firstName", length = 63)
     val lastName = varchar("lastName", length = 63)
     val email = varchar("email", length = 127)

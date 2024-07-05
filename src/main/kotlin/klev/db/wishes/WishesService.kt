@@ -1,6 +1,9 @@
 package klev.db.wishes
 
 import klev.db.UserCRUD
+import klev.db.groups.groupsToWishes.GroupToWish
+import klev.db.groups.groupsToWishes.GroupsToWishesService
+import klev.db.groups.memberships.GroupMembershipService
 import klev.db.wishes.Wishes.description
 import klev.db.wishes.Wishes.img
 import klev.db.wishes.Wishes.occasion
@@ -14,9 +17,12 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import java.util.UUID
 
 class WishesService(
     database: Database,
+    private val groupsToWishesService: GroupsToWishesService,
+    private val groupMembershipService: GroupMembershipService,
 ) : UserCRUD<Wish>(database, Wishes) {
     override fun createMap(
         statement: InsertStatement<Number>,
@@ -57,13 +63,13 @@ class WishesService(
         update[updated] = CurrentTimestamp()
     }
 
-    override suspend fun allOwnedByUser(userId: Int?) = super.allOwnedByUser(userId).filterNot { it.status == Status.DELETED }
+    override suspend fun allOwnedByUser(userId: UUID?) = super.allOwnedByUser(userId).filterNot { it.status == Status.DELETED }
 
     override suspend fun publicPrivacyFilter(input: Wish) = input.visibility == WishVisibility.PUBLIC
 
     suspend fun update(
-        id: Int?,
-        userId: Int?,
+        id: UUID?,
+        userId: UUID?,
         partial: PartialWish,
     ): Wish? {
         val existing = read(id, userId)
@@ -87,8 +93,8 @@ class WishesService(
     }
 
     override suspend fun delete(
-        id: Int?,
-        userId: Int?,
+        id: UUID?,
+        userId: UUID?,
     ): Int {
         val existing = read(id, userId)
         return if (existing == null) {
@@ -98,4 +104,47 @@ class WishesService(
             1
         }
     }
+
+    suspend fun createByPartial(
+        partial: PartialWish,
+        userId: UUID,
+    ): Wish {
+        val wish =
+            create(
+                Wish(
+                    userId = userId,
+                    occasion = partial.occasion?.let { Occasion.valueOf(it.uppercase()) } ?: Occasion.NONE,
+                    description = partial.description,
+                    url = partial.url,
+                    img = partial.img,
+                    visibility = partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE,
+                ),
+            )
+
+        try {
+            val groupId = UUID.fromString(partial.groupId)
+            groupsToWishesService.create(GroupToWish(groupId = groupId, wishId = wish.id))
+        } catch (e: IllegalArgumentException) {
+            // Ignore
+        }
+
+        return wish
+    }
+
+    suspend fun allUserHasGroupAccessTo(oauthUserId: UUID?): Collection<Wish> =
+        if (oauthUserId == null) {
+            emptySet()
+        } else {
+            val groupMemberships = groupMembershipService.allOwnedByUser(oauthUserId)
+            groupMemberships.flatMap { membership ->
+                groupsToWishesService.allByGroup(membership.groupId).mapNotNull {
+                    val wish = read(it.wishId)
+                    if (wish?.visibility == WishVisibility.GROUP) {
+                        wish
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
 }

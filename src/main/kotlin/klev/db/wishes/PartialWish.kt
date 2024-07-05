@@ -10,4 +10,5 @@ data class PartialWish(
     val status: String? = null,
     val img: String? = null,
     val visibility: String? = null,
+    val groupId: String? = null,
 )

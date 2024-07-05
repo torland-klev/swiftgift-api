@@ -6,12 +6,13 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.update
+import java.util.UUID
 
 abstract class UserCRUD<T>(
     database: Database,
     private val table: UserTable,
 ) : CRUD<T>(database, table) {
-    open suspend fun allOwnedByUser(userId: Int?) =
+    open suspend fun allOwnedByUser(userId: UUID?) =
         if (userId == null) {
             emptyList()
         } else {
@@ -20,16 +21,16 @@ abstract class UserCRUD<T>(
             }
         }
 
-    override suspend fun delete(id: Int) = false
+    override suspend fun delete(id: UUID) = false
 
     override suspend fun update(
-        id: Int,
+        id: UUID,
         obj: T,
     ) = null
 
     suspend fun read(
-        id: Int?,
-        userId: Int?,
+        id: UUID?,
+        userId: UUID?,
     ) = if (id == null || userId == null) {
         null
     } else {
@@ -39,8 +40,8 @@ abstract class UserCRUD<T>(
     }
 
     open suspend fun delete(
-        id: Int?,
-        userId: Int?,
+        id: UUID?,
+        userId: UUID?,
     ) = if (id == null || userId == null) {
         0
     } else {
@@ -50,8 +51,8 @@ abstract class UserCRUD<T>(
     }
 
     suspend fun update(
-        id: Int?,
-        userId: Int?,
+        id: UUID?,
+        userId: UUID?,
         obj: T,
     ) = if (id == null || userId == null) {
         null
@@ -62,7 +63,7 @@ abstract class UserCRUD<T>(
         read(id, userId)
     }
 
-    suspend fun deleteAll(userId: Int?) =
+    suspend fun deleteAll(userId: UUID?) =
         if (userId == null) {
             0
         } else {

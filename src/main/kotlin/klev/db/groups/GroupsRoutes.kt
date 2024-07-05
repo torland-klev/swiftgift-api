@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserService
 import klev.oauthUserId
 import klev.routeId

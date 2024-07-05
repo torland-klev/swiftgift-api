@@ -5,6 +5,9 @@ import klev.db.groups.Groups.createdBy
 import klev.db.groups.Groups.name
 import klev.db.groups.Groups.updated
 import klev.db.groups.Groups.visibility
+import klev.db.groups.memberships.GroupMembership
+import klev.db.groups.memberships.GroupMembershipRole
+import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserService
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
@@ -12,6 +15,7 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import java.util.UUID
 
 class GroupService(
     database: Database,
@@ -57,18 +61,18 @@ class GroupService(
         return group
     }
 
-    suspend fun allCreatedByUser(userId: Int?) =
+    suspend fun allCreatedByUser(userId: UUID?) =
         if (userId == null) {
             emptyList()
         } else {
             dbQuery {
                 Groups.select { createdBy eq userId }.map { readMap(it) }
-            } 
+            }
         }
 
     suspend fun getIfHasReadAccess(
-        groupId: Int?,
-        userId: Int?,
+        groupId: UUID?,
+        userId: UUID?,
     ): Group? =
         if (groupId == null || userId == null) {
             null
