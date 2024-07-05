@@ -81,4 +81,25 @@ class GroupService(
         } else {
             null
         }
+
+    suspend fun getIfCanAdmin(
+        groupId: UUID?,
+        userId: UUID?,
+    ): Group? =
+        if (groupId == null || userId == null) {
+            null
+        } else if (groupMembershipService.canAdmin(userId, groupId)) {
+            read(groupId)
+        } else {
+            null
+        }
+
+    suspend fun allUserIsMemberOf(userId: UUID?) =
+        if (userId == null) {
+            emptyList()
+        } else {
+            groupMembershipService.allOwnedByUser(userId).mapNotNull { membership ->
+                read(membership.groupId)
+            }
+        }
 }

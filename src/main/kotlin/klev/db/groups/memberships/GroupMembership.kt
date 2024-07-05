@@ -6,6 +6,7 @@ import java.util.UUID
 
 @Serializable
 data class GroupMembership(
+    @Serializable(with = UUIDSerializer::class) val id: UUID = UUID.randomUUID(),
     @Serializable(with = UUIDSerializer::class) val groupId: UUID,
     @Serializable(with = UUIDSerializer::class) val userId: UUID,
     val role: GroupMembershipRole,

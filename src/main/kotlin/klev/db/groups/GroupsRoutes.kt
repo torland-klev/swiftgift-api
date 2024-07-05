@@ -15,7 +15,10 @@ class GroupsRoutes(
     private val groupMembershipService: GroupMembershipService,
 ) {
     suspend fun all(call: ApplicationCall) {
-        val groups = groupService.allPublic() + groupService.allCreatedByUser(call.oauthUserId())
+        val groups =
+            groupService.allPublic() +
+                groupService.allCreatedByUser(call.oauthUserId()) +
+                groupService.allUserIsMemberOf(call.oauthUserId())
         call.respond(groups.toSet())
     }
 
@@ -52,7 +55,7 @@ class GroupsRoutes(
     }
 
     suspend fun get(call: ApplicationCall) {
-        val groupId = call.routeId()
+        val groupId = call.routeId("groupId")
         val group = groupService.getIfHasReadAccess(userId = call.oauthUserId(), groupId = groupId)
         if (group == null) {
             call.respond(HttpStatusCode.NotFound)
@@ -62,13 +65,16 @@ class GroupsRoutes(
     }
 
     suspend fun deleteIfOwner(call: ApplicationCall) {
-        val groupId = call.routeId()
+        val groupId = call.routeId("groupId")
         val userId = call.oauthUserId()
         if (groupId == null || userId == null) {
             call.respond(HttpStatusCode.NotFound)
         } else if (groupMembershipService.isOwner(userId, groupId)) {
-            groupService.delete(groupId)
-            call.respond(HttpStatusCode.OK)
+            if (groupService.delete(groupId)) {
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.NotModified)
+            }
         } else {
             call.respond(HttpStatusCode.Unauthorized, "Only group owners can delete a group")
         }

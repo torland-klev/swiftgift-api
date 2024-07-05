@@ -6,7 +6,10 @@ import klev.db.groups.memberships.GroupMemberships.role
 import klev.db.groups.memberships.GroupMemberships.userId
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
@@ -17,6 +20,7 @@ class GroupMembershipService(
 ) : UserCRUD<GroupMembership>(database, GroupMemberships) {
     override suspend fun readMap(input: ResultRow) =
         GroupMembership(
+            id = input[GroupMemberships.id].value,
             groupId = input[groupId],
             userId = input[userId],
             role = input[role],
@@ -59,4 +63,25 @@ class GroupMembershipService(
                     (role eq GroupMembershipRole.OWNER)
             }.count()
     } > 0
+
+    suspend fun canAdmin(
+        userId: UUID,
+        groupId: UUID,
+    ) = dbQuery {
+        GroupMemberships
+            .select {
+                (GroupMemberships.userId eq userId) and (GroupMemberships.groupId eq groupId) and
+                    ((role eq GroupMembershipRole.ADMIN) or (role eq GroupMembershipRole.OWNER))
+            }.count()
+    } > 0
+
+    suspend fun allByGroup(groupId: UUID) =
+        dbQuery {
+            GroupMemberships.select { GroupMemberships.groupId eq groupId }.map { readMap(it) }
+        }
+
+    override suspend fun delete(id: UUID) =
+        dbQuery {
+            GroupMemberships.deleteWhere { GroupMemberships.id eq id }
+        } > 0
 }

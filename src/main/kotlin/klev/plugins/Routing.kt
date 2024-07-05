@@ -12,6 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import klev.db.groups.GroupsRoutes
+import klev.db.groups.memberships.GroupMembershipRoutes
 import klev.db.users.UserRoutes
 import klev.db.wishes.Occasion
 import klev.db.wishes.Status
@@ -21,6 +22,7 @@ import klev.mainHtml
 fun Application.configureRouting(
     wishesRoutes: WishesRoutes,
     groupsRoutes: GroupsRoutes,
+    groupMembershipRoutes: GroupMembershipRoutes,
     userRoutes: UserRoutes,
 ) {
     routing {
@@ -47,12 +49,23 @@ fun Application.configureRouting(
                 post {
                     groupsRoutes.post(call)
                 }
-                route("/{id}") {
+                route("/{groupId}") {
                     get {
                         groupsRoutes.get(call)
                     }
                     delete {
                         groupsRoutes.deleteIfOwner(call)
+                    }
+                    route("/memberships") {
+                        get {
+                            groupMembershipRoutes.allByGroup(call)
+                        }
+                        get("/{membershipId}") {
+                            groupMembershipRoutes.get(call)
+                        }
+                        delete("/{membershipId}") {
+                            groupMembershipRoutes.deleteIfCanAdmin(call)
+                        }
                     }
                 }
             }

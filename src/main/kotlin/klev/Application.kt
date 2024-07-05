@@ -14,6 +14,7 @@ import io.ktor.server.netty.Netty
 import klev.db.groups.GroupService
 import klev.db.groups.GroupsRoutes
 import klev.db.groups.groupsToWishes.GroupsToWishesService
+import klev.db.groups.memberships.GroupMembershipRoutes
 import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserRoutes
 import klev.db.users.UserService
@@ -64,9 +65,9 @@ fun ApplicationCall.oauthUserId() =
         null
     }
 
-fun ApplicationCall.routeId() =
+fun ApplicationCall.routeId(param: String = "id") =
     try {
-        parameters["id"]?.let { UUID.fromString(it) }
+        parameters[param]?.let { UUID.fromString(it) }
     } catch (e: IllegalArgumentException) {
         null
     }
@@ -87,5 +88,11 @@ fun Application.module() {
             ),
         userRoutes = UserRoutes(userService = userService),
         wishesRoutes = WishesRoutes(wishesService = wishesService),
+        groupMembershipRoutes =
+            GroupMembershipRoutes(
+                groupService = groupService,
+                userService = userService,
+                groupMembershipService = groupMembershipService,
+            ),
     )
 }
