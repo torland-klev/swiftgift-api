@@ -16,7 +16,7 @@ class GroupMembershipRoutes(
     suspend fun allByGroup(call: ApplicationCall) {
         val userId = call.oauthUserId()
         val groupId = call.routeId("groupId")
-        val group = groupService.getIfCanAdmin(groupId = groupId, userId = userId)
+        val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
         if (group == null) {
             call.respond(HttpStatusCode.NotFound)
         } else {
@@ -29,16 +29,16 @@ class GroupMembershipRoutes(
     suspend fun deleteIfCanAdmin(call: ApplicationCall) {
         val userId = call.oauthUserId()
         val groupId = call.routeId("groupId")
-        val membershipId = call.routeId("membershipId")
+        val memberId = call.routeId("memberId")
         val group = groupService.getIfCanAdmin(groupId = groupId, userId = userId)
-        if (group == null || membershipId == null) {
+        if (group == null || memberId == null) {
             call.respond(HttpStatusCode.NotFound)
         } else {
             val deleteSuccesses =
                 groupMembershipService
                     .allByGroup(groupId = group.id)
                     .filter {
-                        it.userId == membershipId && it.groupId == group.id && it.role != GroupMembershipRole.OWNER
+                        it.userId == memberId && it.groupId == group.id && it.role != GroupMembershipRole.OWNER
                     }.map { groupMembershipService.delete(it.id) }
             if (deleteSuccesses.isEmpty() || deleteSuccesses.none { it }) {
                 call.respond(HttpStatusCode.NotFound)
@@ -53,17 +53,114 @@ class GroupMembershipRoutes(
     suspend fun get(call: ApplicationCall) {
         val userId = call.oauthUserId()
         val groupId = call.routeId("groupId")
-        val membershipId = call.routeId("membershipId")
+        val memberId = call.routeId("memberId")
         val group = groupService.getIfCanAdmin(groupId = groupId, userId = userId)
-        if (group == null || membershipId == null) {
+        if (group == null || memberId == null) {
             call.respond(HttpStatusCode.NotFound)
         } else {
-            val membership = groupMembershipService.allByGroup(groupId = group.id).firstOrNull { it.userId == membershipId }
+            val membership = groupMembershipService.byGroupAndUser(groupId = group.id, userId = memberId)
             if (membership == null) {
                 call.respond(HttpStatusCode.NotFound)
             } else {
                 call.respond(HttpStatusCode.OK, membership)
             }
         }
+    }
+
+    suspend fun addUserToGroup(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val memberId = call.routeId("memberId")
+        val group = groupService.getIfCanAdmin(groupId = groupId, userId = userId)
+        if (memberId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Missing member ID")
+        } else if (group == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val membership =
+                groupMembershipService.byGroupAndUser(groupId = group.id, userId = memberId) ?: groupMembershipService.create(
+                    GroupMembership(
+                        groupId = group.id,
+                        userId = memberId,
+                        role = GroupMembershipRole.MEMBER,
+                    ),
+                )
+            call.respond(HttpStatusCode.OK, membership)
+        }
+    }
+
+    suspend fun getAdmins(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
+        if (group == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val memberships = groupMembershipService.allByGroup(groupId = group.id)
+            val users =
+                memberships
+                    .filter {
+                        it.role == GroupMembershipRole.ADMIN || it.role == GroupMembershipRole.OWNER
+                    }.map { userService.read(it.userId) }
+            call.respond(HttpStatusCode.OK, users)
+        }
+    }
+
+    suspend fun getAdminById(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val adminId = call.routeId("memberId")
+        val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
+        if (adminId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Missing admin ID")
+        } else if (group == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val membership = groupMembershipService.byGroupAndUser(groupId = group.id, userId = adminId)
+            if (membership == null || (membership.role != GroupMembershipRole.ADMIN && membership.role != GroupMembershipRole.OWNER)) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(HttpStatusCode.OK, membership)
+            }
+        }
+    }
+
+    suspend fun makeAdmin(call: ApplicationCall) {
+        setRoleIfAdmin(call, GroupMembershipRole.ADMIN)
+    }
+
+    private suspend fun setRoleIfAdmin(
+        call: ApplicationCall,
+        role: GroupMembershipRole,
+    ) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val memberId = call.routeId("memberId")
+        val group = groupService.getIfCanAdmin(groupId = groupId, userId = userId)
+        if (memberId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Missing member ID")
+        } else if (group == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val membership =
+                groupMembershipService.byGroupAndUser(groupId = group.id, userId = memberId) ?: groupMembershipService.create(
+                    GroupMembership(
+                        groupId = group.id,
+                        userId = memberId,
+                        role = role,
+                    ),
+                )
+            if (membership.role == GroupMembershipRole.OWNER) {
+                call.respond(HttpStatusCode.MethodNotAllowed, "Cannot change role of owner")
+            } else {
+                val membershipAsAdmin = membership.copy(role = role)
+                groupMembershipService.update(membership.id, memberId, membershipAsAdmin)
+                call.respond(HttpStatusCode.OK, membershipAsAdmin)
+            }
+        }
+    }
+
+    suspend fun removeAsAdmin(call: ApplicationCall) {
+        setRoleIfAdmin(call, GroupMembershipRole.MEMBER)
     }
 }

@@ -56,15 +56,35 @@ fun Application.configureRouting(
                     delete {
                         groupsRoutes.deleteIfOwner(call)
                     }
+                    patch {
+                        groupsRoutes.updateIfAdmin(call)
+                    }
                     route("/memberships") {
                         get {
                             groupMembershipRoutes.allByGroup(call)
                         }
-                        get("/{membershipId}") {
+                        get("/{memberId}") {
                             groupMembershipRoutes.get(call)
                         }
-                        delete("/{membershipId}") {
+                        delete("/{memberId}") {
                             groupMembershipRoutes.deleteIfCanAdmin(call)
+                        }
+                        post("/{memberId}") {
+                            groupMembershipRoutes.addUserToGroup(call)
+                        }
+                        route("/admins") {
+                            get {
+                                groupMembershipRoutes.getAdmins(call)
+                            }
+                            get("/{memberId}") {
+                                groupMembershipRoutes.getAdminById(call)
+                            }
+                            post("/{memberId}") {
+                                groupMembershipRoutes.makeAdmin(call)
+                            }
+                            delete("/{memberId}") {
+                                groupMembershipRoutes.removeAsAdmin(call)
+                            }
                         }
                     }
                 }

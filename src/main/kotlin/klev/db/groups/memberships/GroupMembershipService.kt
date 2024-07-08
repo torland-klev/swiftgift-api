@@ -84,4 +84,17 @@ class GroupMembershipService(
         dbQuery {
             GroupMemberships.deleteWhere { GroupMemberships.id eq id }
         } > 0
+
+    suspend fun byGroupAndUser(
+        groupId: UUID,
+        userId: UUID,
+    ) = dbQuery {
+        GroupMemberships
+            .select { (GroupMemberships.groupId eq groupId) and (GroupMemberships.userId eq userId) }
+            .map {
+                readMap(
+                    it,
+                )
+            }.singleOrNull()
+    }
 }

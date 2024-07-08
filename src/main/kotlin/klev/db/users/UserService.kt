@@ -40,12 +40,16 @@ class UserService(
                 .value
         }
 
-    suspend fun read(id: UUID): User? =
-        dbQuery {
-            Users
-                .select { Users.id eq id }
-                .map { User(id = id, firstName = it[Users.firstName], lastName = it[Users.lastName], email = it[Users.email]) }
-                .singleOrNull()
+    suspend fun read(id: UUID?): User? =
+        if (id == null) {
+            null
+        } else {
+            dbQuery {
+                Users
+                    .select { Users.id eq id }
+                    .map { User(id = id, firstName = it[Users.firstName], lastName = it[Users.lastName], email = it[Users.email]) }
+                    .singleOrNull()
+            }
         }
 
     private suspend fun getUserFromGoogleUser(googleUser: GoogleUser): User? {

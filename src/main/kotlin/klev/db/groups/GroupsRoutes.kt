@@ -29,23 +29,18 @@ class GroupsRoutes(
                 call.respond(HttpStatusCode.Unauthorized)
             } else {
                 val partialGroup = call.receive<PartialGroup>()
-                if (partialGroup.name == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Group name is required")
-                } else if (partialGroup.visibility == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Group visibility is required")
-                } else if (GroupVisibility.entries.none { it.name == partialGroup.visibility.uppercase() }) {
-                    call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Group visibility ${partialGroup.visibility} not supported. Supported values are ${GroupVisibility.entries}",
-                    )
+                val partialGroupError = partialGroup.errorMessages()
+
+                if (partialGroupError != null) {
+                    call.respond(HttpStatusCode.BadRequest, partialGroupError)
                 } else {
                     call.respond(
                         HttpStatusCode.Created,
                         groupService.create(
                             Group(
-                                name = partialGroup.name,
+                                name = partialGroup.name!!,
                                 createdBy = user,
-                                visibility = GroupVisibility.valueOf(partialGroup.visibility.uppercase()),
+                                visibility = GroupVisibility.valueOf(partialGroup.visibility!!.uppercase()),
                             ),
                         ),
                     )
@@ -77,6 +72,32 @@ class GroupsRoutes(
             }
         } else {
             call.respond(HttpStatusCode.Unauthorized, "Only group owners can delete a group")
+        }
+    }
+
+    suspend fun updateIfAdmin(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val user = userService.read(userId)
+        if (user == null || groupId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val partialGroup = call.receive<PartialGroup>()
+            val partialGroupError = partialGroup.errorMessages()
+            val group = groupService.getIfCanAdmin(userId = userId, groupId = groupId)
+            if (group == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else if (partialGroupError != null) {
+                call.respond(HttpStatusCode.BadRequest, partialGroupError)
+            } else {
+                val newGroup =
+                    group.copy(
+                        name = partialGroup.name!!,
+                        visibility = GroupVisibility.valueOf(partialGroup.visibility!!.uppercase()),
+                    )
+                groupService.update(id = group.id, obj = newGroup)
+                call.respond(HttpStatusCode.OK, newGroup)
+            }
         }
     }
 }
