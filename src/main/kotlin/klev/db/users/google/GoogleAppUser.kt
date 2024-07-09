@@ -8,6 +8,6 @@ data class GoogleAppUser(
     val displayName: String,
     val email: String,
     val photoUrl: String,
-    val serverAuthCode: String,
+    val serverAuthCode: String?,
     val accessToken: String,
 )
