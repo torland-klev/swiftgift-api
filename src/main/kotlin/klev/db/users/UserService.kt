@@ -108,10 +108,15 @@ class UserService(
     suspend fun createOrUpdate(
         session: UserSession,
         provider: UserProvider,
+    ) = createOrUpdate(token = session.token, provider = provider)
+
+    suspend fun createOrUpdate(
+        token: String,
+        provider: UserProvider,
     ): User =
         when (provider) {
             UserProvider.GOOGLE -> {
-                googleUserService.createOrUpdate(GoogleUser.fromSession(httpClient, session)).toUser(session.token)
+                googleUserService.createOrUpdate(googleUser = GoogleUser.fromSession(httpClient, token)).toUser(token)
             }
         }
 

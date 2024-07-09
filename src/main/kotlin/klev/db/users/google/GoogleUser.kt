@@ -8,7 +8,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.URLProtocol
 import io.ktor.http.headers
 import io.ktor.http.path
-import klev.db.users.UserSession
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,7 +24,7 @@ data class GoogleUser(
     companion object {
         suspend fun fromSession(
             httpClient: HttpClient,
-            userSession: UserSession,
+            token: String,
         ): GoogleUser {
             val request =
                 httpClient.prepareRequest {
@@ -36,7 +35,7 @@ data class GoogleUser(
                         path("oauth2/v2/userinfo")
                     }
                     headers {
-                        bearerAuth(userSession.token)
+                        bearerAuth(token)
                     }
                 }
 

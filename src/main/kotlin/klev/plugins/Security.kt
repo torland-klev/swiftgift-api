@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -19,10 +20,14 @@ import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
 import io.ktor.server.auth.oauth
 import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
 import io.ktor.server.request.uri
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
@@ -33,6 +38,7 @@ import klev.db.users.UserAndSession
 import klev.db.users.UserProvider
 import klev.db.users.UserService
 import klev.db.users.UserSession
+import klev.db.users.google.GoogleAppUser
 import klev.oauthUserId
 
 fun Application.configureSecurity(
@@ -94,6 +100,13 @@ fun Application.configureSecurity(
         }
     }
     routing {
+        route("/appLogin") {
+            post {
+                val appUser = call.receive<GoogleAppUser>()
+                val user = userService.createOrUpdate(token = appUser.accessToken, provider = UserProvider.GOOGLE)
+                call.respond(HttpStatusCode.OK, user)
+            }
+        }
         authenticate("auth-basic") {
             get("/basic") {
                 call.respondText("Hello, ${call.principal<UserIdPrincipal>()?.name}!")
