@@ -1,6 +1,7 @@
 package klev.db.wishes
 
 import klev.db.UserCRUD
+import klev.db.groups.GroupService
 import klev.db.groups.groupsToWishes.GroupToWish
 import klev.db.groups.groupsToWishes.GroupsToWishesService
 import klev.db.groups.memberships.GroupMembershipService
@@ -23,6 +24,7 @@ class WishesService(
     database: Database,
     private val groupsToWishesService: GroupsToWishesService,
     private val groupMembershipService: GroupMembershipService,
+    private val groupService: GroupService,
 ) : UserCRUD<Wish>(database, Wishes) {
     override fun createMap(
         statement: InsertStatement<Number>,
@@ -123,7 +125,10 @@ class WishesService(
 
         try {
             val groupId = UUID.fromString(partial.groupId)
-            groupsToWishesService.create(GroupToWish(groupId = groupId, wishId = wish.id))
+            val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
+            if (group != null) {
+                groupsToWishesService.create(GroupToWish(groupId = groupId, wishId = wish.id))
+            }
         } catch (e: IllegalArgumentException) {
             // Ignore
         }

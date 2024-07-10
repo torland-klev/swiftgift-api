@@ -54,9 +54,14 @@ private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 private val groupsToWishesService = GroupsToWishesService(database = database)
 private val groupMembershipService = GroupMembershipService(database)
-private val wishesService =
-    WishesService(database = database, groupsToWishesService = groupsToWishesService, groupMembershipService = groupMembershipService)
 private val groupService = GroupService(database = database, groupMembershipService = groupMembershipService, userService = userService)
+private val wishesService =
+    WishesService(
+        database = database,
+        groupsToWishesService = groupsToWishesService,
+        groupMembershipService = groupMembershipService,
+        groupService = groupService,
+    )
 
 fun ApplicationCall.oauthUserId() =
     try {
