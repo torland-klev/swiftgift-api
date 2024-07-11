@@ -24,7 +24,9 @@ class UserRoutes(
         val oauthId = call.oauthUserId()
         val id = call.routeId()
         if (id == null || id != oauthId) {
-            call.respond(HttpStatusCode.NotFound)
+            userService.read(id)?.let {
+                call.respond(HttpStatusCode.OK, it.copy(email = "", lastName = ""))
+            } ?: call.respond(HttpStatusCode.NotFound)
         } else {
             userService.read(id)?.let {
                 call.respond(HttpStatusCode.OK, it)

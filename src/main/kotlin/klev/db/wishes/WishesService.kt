@@ -131,6 +131,8 @@ class WishesService(
             }
         } catch (e: IllegalArgumentException) {
             // Ignore
+        } catch (e: NullPointerException) {
+            // Ignore
         }
 
         return wish
