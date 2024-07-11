@@ -59,7 +59,7 @@ fun Application.configureRouting(
                     patch {
                         groupsRoutes.updateIfAdmin(call)
                     }
-                    route("/memberships") {
+                    route("/members") {
                         get {
                             groupMembershipRoutes.allByGroup(call)
                         }
