@@ -80,6 +80,7 @@ class WishesService(
         } else {
             val occasion = partial.occasion?.let { Occasion.valueOf(it.uppercase()) }
             val status = partial.status?.let { Status.valueOf(it.uppercase()) }
+            val visibility = partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) }
             update(
                 id,
                 userId,
@@ -89,6 +90,7 @@ class WishesService(
                     url = partial.url ?: existing.url,
                     description = partial.description ?: existing.description,
                     img = partial.img ?: existing.img,
+                    visibility = visibility ?: existing.visibility,
                 ),
             )
         }
