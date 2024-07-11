@@ -59,6 +59,9 @@ fun Application.configureRouting(
                     patch {
                         groupsRoutes.updateIfAdmin(call)
                     }
+                    post("/invite") {
+                        groupsRoutes.inviteIfAdmin(call)
+                    }
                     route("/members") {
                         get {
                             groupMembershipRoutes.allByGroup(call)

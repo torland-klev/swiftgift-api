@@ -1,6 +1,7 @@
 package klev.db.groups.memberships
 
 import klev.db.UserCRUD
+import klev.db.groups.Groups.updated
 import klev.db.groups.memberships.GroupMemberships.groupId
 import klev.db.groups.memberships.GroupMemberships.role
 import klev.db.groups.memberships.GroupMemberships.userId
@@ -9,6 +10,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
@@ -44,6 +46,7 @@ class GroupMembershipService(
         update[groupId] = obj.groupId
         update[userId] = obj.userId
         update[role] = obj.role
+        update[updated] = CurrentTimestamp()
     }
 
     suspend fun isMember(

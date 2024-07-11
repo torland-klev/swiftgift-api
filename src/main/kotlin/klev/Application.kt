@@ -14,6 +14,7 @@ import io.ktor.server.netty.Netty
 import klev.db.groups.GroupService
 import klev.db.groups.GroupsRoutes
 import klev.db.groups.groupsToWishes.GroupsToWishesService
+import klev.db.groups.invitations.InvitationService
 import klev.db.groups.memberships.GroupMembershipRoutes
 import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserRoutes
@@ -50,6 +51,7 @@ val database =
         password = env["DB_PASSWORD"],
     )
 
+private val invitationService = InvitationService(database = database)
 private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 private val groupsToWishesService = GroupsToWishesService(database = database)
@@ -90,6 +92,7 @@ fun Application.module() {
                 groupService = groupService,
                 userService = userService,
                 groupMembershipService = groupMembershipService,
+                invitationService = invitationService,
             ),
         userRoutes = UserRoutes(userService = userService),
         wishesRoutes = WishesRoutes(wishesService = wishesService),

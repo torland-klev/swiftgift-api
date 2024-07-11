@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import klev.db.groups.invitations.InvitationService
 import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserService
 import klev.oauthUserId
@@ -13,6 +14,7 @@ class GroupsRoutes(
     private val groupService: GroupService,
     private val userService: UserService,
     private val groupMembershipService: GroupMembershipService,
+    private val invitationService: InvitationService,
 ) {
     suspend fun all(call: ApplicationCall) {
         val groups =
@@ -97,6 +99,27 @@ class GroupsRoutes(
                     )
                 groupService.update(id = group.id, obj = newGroup)
                 call.respond(HttpStatusCode.OK, newGroup)
+            }
+        }
+    }
+
+    suspend fun inviteIfAdmin(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val user = userService.read(userId)
+        if (user == null || groupId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val group = groupService.getIfCanAdmin(userId = userId, groupId = groupId)
+            if (group == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                val invite =
+                    invitationService.create(
+                        groupId = group.id,
+                        invitedBy = user.id,
+                    )
+                call.respond(HttpStatusCode.Created, invite.inviteUrl())
             }
         }
     }
