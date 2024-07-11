@@ -76,10 +76,13 @@ class GroupService(
     ): Group? =
         if (groupId == null || userId == null) {
             null
-        } else if (groupMembershipService.isMember(userId, groupId)) {
-            read(groupId)
         } else {
-            null
+            val group = read(groupId)
+            if (group?.visibility == GroupVisibility.PUBLIC || groupMembershipService.isMember(userId, groupId)) {
+                group
+            } else {
+                null
+            }
         }
 
     suspend fun getIfCanAdmin(
