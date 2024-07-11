@@ -51,12 +51,12 @@ val database =
         password = env["DB_PASSWORD"],
     )
 
-private val invitationService = InvitationService(database = database)
 private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 private val groupsToWishesService = GroupsToWishesService(database = database)
 private val groupMembershipService = GroupMembershipService(database)
 private val groupService = GroupService(database = database, groupMembershipService = groupMembershipService, userService = userService)
+private val invitationService = InvitationService(database = database, groupMembershipService = groupMembershipService)
 private val wishesService =
     WishesService(
         database = database,
@@ -83,6 +83,7 @@ fun Application.module() {
     configureSecurity(
         httpClient = applicationHttpClient,
         userService = userService,
+        invitationService = invitationService,
     )
     configureHTTP()
     configureSerialization()

@@ -7,4 +7,8 @@ import org.jetbrains.exposed.sql.ReferenceOption
 object GroupMemberships : UserTable() {
     val groupId = uuid("groupId").references(Groups.id, onDelete = ReferenceOption.CASCADE)
     val role = enumerationByName<GroupMembershipRole>("role", 15)
+
+    init {
+        index(true, groupId, userId)
+    }
 }

@@ -34,23 +34,26 @@ import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import klev.db.groups.invitations.InvitationService
+import klev.db.users.InviteData
 import klev.db.users.UserAndSession
 import klev.db.users.UserProvider
 import klev.db.users.UserService
 import klev.db.users.UserSession
 import klev.db.users.google.GoogleAppUser
 import klev.oauthUserId
+import java.util.UUID
 
 fun Application.configureSecurity(
     httpClient: HttpClient,
     userService: UserService,
+    invitationService: InvitationService,
 ) {
     val env = dotenv()
     install(Sessions) {
         cookie<UserAndSession>(env["SESSION_COOKIE_NAME"])
+        cookie<InviteData>("invite_data")
     }
-
-    val redirects = mutableMapOf<String, String>()
 
     install(Authentication) {
         basic("auth-basic") {
@@ -88,12 +91,6 @@ fun Application.configureSecurity(
                             "https://www.googleapis.com/auth/userinfo.email",
                         ),
                     extraAuthParameters = listOf("access_type" to "offline"),
-                    onStateCreated = { call, state ->
-                        // saves new state with redirect url value
-                        call.request.queryParameters["redirectUrl"]?.let {
-                            redirects[state] = it
-                        }
-                    },
                 )
             }
             client = httpClient
@@ -106,6 +103,15 @@ fun Application.configureSecurity(
                 val user = userService.createOrUpdate(token = appUser.accessToken, provider = UserProvider.GOOGLE)
                 call.respond(HttpStatusCode.OK, user)
             }
+        }
+        get("/confirmInvite/{inviteId}") {
+            try {
+                val uuid = UUID.fromString(call.parameters["inviteId"])
+                call.sessions.set(InviteData(inviteId = uuid))
+            } catch (e: IllegalArgumentException) {
+                // Do nothing
+            }
+            call.respondRedirect("/login")
         }
         authenticate("auth-basic") {
             get("/basic") {
@@ -127,16 +133,18 @@ fun Application.configureSecurity(
             get("/callback") {
                 val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
                 // redirects home if the url is not found before authorization
-                currentPrincipal?.let { principal ->
-                    principal.state?.let { state ->
-                        val session = UserSession(state, principal.accessToken)
-                        val user = userService.createOrUpdate(session = session, provider = UserProvider.GOOGLE)
-                        call.sessions.set(UserAndSession(user = user, session = session))
-                        redirects[state]?.let { redirect ->
-                            call.respondRedirect(redirect)
-                            return@get
+                val user =
+                    currentPrincipal?.let { principal ->
+                        principal.state?.let { state ->
+                            val session = UserSession(state, principal.accessToken)
+                            val user = userService.createOrUpdate(session = session, provider = UserProvider.GOOGLE)
+                            call.sessions.set(UserAndSession(user = user, session = session))
+                            user
                         }
                     }
+
+                call.sessions.get<InviteData>()?.inviteId?.let { inviteId ->
+                    user?.id?.let { userId -> invitationService.completeInvitation(inviteId, userId) }
                 }
                 call.respondRedirect("/home")
             }
