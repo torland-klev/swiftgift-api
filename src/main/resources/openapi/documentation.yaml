@@ -1,0 +1,919 @@
+openapi: "3.1.0"
+info:
+  title: "Gaveliste API"
+  description: "Gaveliste API"
+  version: "1.0.0"
+servers:
+- url: "https://api.henrikklev.no"
+paths:
+  /:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Function1_? super HTML"
+              examples:
+                text/html:
+                  description: "HTML document"
+                  value: ""
+  /groups:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Group"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialGroup"
+        required: true
+      responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Group"
+  /groups/{groupId}:
+    delete:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "304":
+          description: "Not Modified"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Only group owners can delete a group"
+    get:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Group"
+    patch:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialGroup"
+        required: true
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Group"
+  /groups/{groupId}/invite:
+    post:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /groups/{groupId}/members:
+    get:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+  /groups/{groupId}/members/{memberId}:
+    delete:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "206":
+          description: "Partial Content"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+    post:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Missing member ID"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+  /groups/{groupId}/members/admins:
+    get:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+  /groups/{groupId}/members/admins/{memberId}:
+    delete:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Missing member ID"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "405":
+          description: "Method Not Allowed"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Cannot change role of owner"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+    get:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Missing admin ID"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+    post:
+      description: ""
+      parameters:
+      - name: "groupId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "memberId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Missing member ID"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "405":
+          description: "Method Not Allowed"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Cannot change role of owner"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+  /home:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Url"
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+  /users:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /users/{id}:
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /wishes:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Wish"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialWish"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Wish"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /wishes/{id}:
+    delete:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Wish"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    patch:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialWish"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Wish"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /wishes/occasion:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  type: "string"
+  /wishes/status:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  type: "string"
+  /appLogin:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleAppUser"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+  /basic:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /bearer:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /callback:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "/home"
+  /confirmInvite/{inviteId}:
+    get:
+      description: ""
+      parameters:
+      - name: "inviteId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "/login"
+  /login:
+    get:
+      description: ""
+  /json/kotlinx-serialization:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
+components:
+  schemas:
+    Function1:
+      type: "object"
+      properties: {}
+    Function1_? super HTML:
+      type: "object"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+      required:
+      - "id"
+      - "firstName"
+      - "lastName"
+      - "email"
+    Group:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        createdBy:
+          $ref: "#/components/schemas/User"
+        visibility:
+          type: "string"
+          enum:
+          - "PRIVATE"
+          - "PUBLIC"
+          - "COMPLETED"
+      required:
+      - "id"
+      - "name"
+      - "createdBy"
+      - "visibility"
+    PartialGroup:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        visibility:
+          type: "string"
+    GroupMembership:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        groupId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        role:
+          type: "string"
+          enum:
+          - "OWNER"
+          - "ADMIN"
+          - "MODERATOR"
+          - "MEMBER"
+      required:
+      - "id"
+      - "groupId"
+      - "userId"
+      - "role"
+    URLProtocol:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        defaultPort:
+          type: "integer"
+          format: "int32"
+      required:
+      - "name"
+    Parameters:
+      type: "object"
+      properties: {}
+    Url:
+      type: "object"
+      properties:
+        protocol:
+          $ref: "#/components/schemas/URLProtocol"
+        host:
+          type: "string"
+        specifiedPort:
+          type: "integer"
+          format: "int32"
+        pathSegments:
+          type: "array"
+          items:
+            type: "string"
+        parameters:
+          $ref: "#/components/schemas/Parameters"
+        fragment:
+          type: "string"
+        user:
+          type: "string"
+        password:
+          type: "string"
+        trailingQuery:
+          type: "boolean"
+      required:
+      - "protocol"
+      - "host"
+      - "pathSegments"
+      - "parameters"
+      - "fragment"
+    Wish:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        occasion:
+          type: "string"
+          enum:
+          - "BIRTHDAY"
+          - "CHRISTMAS"
+          - "WEDDING"
+          - "GRADUATION"
+          - "NONE"
+        status:
+          type: "string"
+          enum:
+          - "OPEN"
+          - "SELECTED"
+          - "FULFILLED"
+          - "DELETED"
+        url:
+          type: "string"
+        description:
+          type: "string"
+        img:
+          type: "string"
+        visibility:
+          type: "string"
+          enum:
+          - "PRIVATE"
+          - "PUBLIC"
+          - "GROUP"
+      required:
+      - "id"
+      - "userId"
+      - "occasion"
+      - "status"
+      - "visibility"
+    PartialWish:
+      type: "object"
+      properties:
+        occasion:
+          type: "string"
+        url:
+          type: "string"
+        description:
+          type: "string"
+        status:
+          type: "string"
+        img:
+          type: "string"
+        visibility:
+          type: "string"
+        groupId:
+          type: "string"
+    GoogleAppUser:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        displayName:
+          type: "string"
+        email:
+          type: "string"
+        photoUrl:
+          type: "string"
+        serverAuthCode:
+          type: "string"
+        accessToken:
+          type: "string"
+      required:
+      - "id"
+      - "displayName"
+      - "email"
+      - "photoUrl"
+      - "accessToken"
+    Map:
+      type: "object"
+      properties: {}
+    Map_String:
+      type: "string"
