@@ -1,31 +1,93 @@
 openapi: "3.1.0"
 info:
-  title: "Gaveliste API"
-  description: "Gaveliste API"
+  title: "SwiftGift API"
+  description: "The API of SwiftGift. In order to authorize, go to https://api.swiftgift.no/ and login. You will then be redirected to https://api.swiftgift.no/token. Use that token to authorize in this spec."
   version: "1.0.0"
 servers:
-- url: "https://api.henrikklev.no"
+- url: "https://api.swiftgift.no"
+
+security:
+  - bearerAuth: []
+
 paths:
   /:
     get:
-      description: ""
+      description: "The API landing page with login options"
+      security: []
       responses:
         "200":
           description: "OK"
           content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
+            text/html:
+              type: object
               examples:
                 text/html:
-                  description: "HTML document"
-                  value: ""
+                  description: "Landing page with google login"
+                  value: |
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>
+                            body {
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                margin: 0;
+                                background-color: rgb(23, 25, 31);
+                                font-family: Arial, sans-serif;
+                            }
+                            .login-container {
+                                background: white;
+                                padding: 2rem;
+                                border-radius: 8px;
+                                background-color: rgb(16, 18, 22);
+                                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                            }
+                            .login-button {
+                                display: flex;
+                                align-items: center;
+                                flex-direction: row;
+                                justify-content: center;
+                                gap: 1rem;
+                                padding: 1rem 4rem;
+                                font-size: 1.1rem;
+                                color: black;
+                                background-color: rgb(255, 255, 255);
+                                border: none;
+                                border-radius: 4px;
+                                text-decoration: none;
+                                cursor: pointer;
+                            }
+                            .login-button:hover {
+                                background-color: rgb(207, 208, 208);
+                            }
+                            img {
+                                width: 28px;
+                                height: 28px;
+                                margin-left: -2.9rem;
+                                margin-right: 2rem;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="login-container">
+                            <p>
+                                <a href="/login" class="login-button">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
+                                    Sign in with Google
+                                </a>
+                            </p>
+                        </div>
+                    </body>
+                    </html>
+
   /groups:
     get:
       description: ""
       responses:
         "200":
-          description: "OK"
+          description: "Retrieves all groups that (a) is public, (b) is created by user, or (c) the user is a member of."
           content:
             '*/*':
               schema:
@@ -42,26 +104,26 @@ paths:
         required: true
       responses:
         "401":
-          description: "Unauthorized"
+          description: "User cannot be determined"
           content:
             '*/*':
               schema:
                 type: "object"
         "400":
-          description: "Bad Request"
+          description: "Partial group is invalid. Will return appropriate validation error."
           content:
             '*/*':
               schema:
                 type: "string"
         "201":
-          description: "Created"
+          description: "Group is successfully created"
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Group"
   /groups/{groupId}:
     delete:
-      description: ""
+      description: "Deletes the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -70,7 +132,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group could not be found for user"
           content:
             '*/*':
               schema:
@@ -82,22 +144,22 @@ paths:
               schema:
                 type: "object"
         "304":
-          description: "Not Modified"
+          description: "Group could not be successfully deleted. Some data related to the group might still be deleted."
           content:
             '*/*':
               schema:
                 type: "object"
         "401":
-          description: "Unauthorized"
+          description: "User is not the owner of the group"
           content:
             '*/*':
               schema:
                 type: "string"
               examples:
-                Example#1:
+                User is not owner of group:
                   value: "Only group owners can delete a group"
     get:
-      description: ""
+      description: "Retrieves the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -106,7 +168,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group could not be found, or user does not have read access"
           content:
             '*/*':
               schema:
@@ -118,7 +180,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Group"
     patch:
-      description: ""
+      description: "Updates the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -133,13 +195,13 @@ paths:
         required: true
       responses:
         "404":
-          description: "Not Found"
+          description: "Group is not found for user"
           content:
             '*/*':
               schema:
                 type: "object"
         "400":
-          description: "Bad Request"
+          description: "The request body does not contain a valid PartialGroup"
           content:
             '*/*':
               schema:
@@ -152,7 +214,7 @@ paths:
                 $ref: "#/components/schemas/Group"
   /groups/{groupId}/invite:
     post:
-      description: ""
+      description: "Creates an invite for the group. The invite must be handled by initiating party."
       parameters:
       - name: "groupId"
         in: "path"
@@ -161,20 +223,20 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group is not found for user"
           content:
             '*/*':
               schema:
                 type: "object"
         "201":
-          description: "Created"
+          description: "Invite is successfully created"
           content:
             '*/*':
               schema:
                 type: "string"
   /groups/{groupId}/members:
     get:
-      description: ""
+      description: "Retrieves all members of group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -183,7 +245,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group is not found for user"
           content:
             '*/*':
               schema:
@@ -198,7 +260,7 @@ paths:
                   $ref: "#/components/schemas/User"
   /groups/{groupId}/members/{memberId}:
     delete:
-      description: ""
+      description: "Removes the membership of the member from the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -212,7 +274,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group, member or membership is not found"
           content:
             '*/*':
               schema:
@@ -224,13 +286,13 @@ paths:
               schema:
                 type: "object"
         "206":
-          description: "Partial Content"
+          description: "Only some of the memberships of the member could be deleted"
           content:
             '*/*':
               schema:
                 type: "object"
     get:
-      description: ""
+      description: "Retrieves the group membership for the member"
       parameters:
       - name: "groupId"
         in: "path"
@@ -244,7 +306,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group, member or membership is not found"
           content:
             '*/*':
               schema:
@@ -256,30 +318,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/GroupMembership"
     post:
-      description: ""
+      description: "Adds the user as a member to the group"
       parameters:
       - name: "groupId"
         in: "path"
         required: true
         schema:
           type: "string"
-      - name: "memberId"
+      - name: "userId"
         in: "path"
         required: true
         schema:
           type: "string"
       responses:
         "400":
-          description: "Bad Request"
+          description: "User ID missing"
           content:
             '*/*':
               schema:
                 type: "string"
               examples:
-                Example#1:
+                Member ID missing:
                   value: "Missing member ID"
         "404":
-          description: "Not Found"
+          description: "Group or user could not be found"
           content:
             '*/*':
               schema:
@@ -292,7 +354,7 @@ paths:
                 $ref: "#/components/schemas/GroupMembership"
   /groups/{groupId}/members/admins:
     get:
-      description: ""
+      description: "Retrieves all members with administrator privileges for the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -301,7 +363,7 @@ paths:
           type: "string"
       responses:
         "404":
-          description: "Not Found"
+          description: "Group could not be found for user"
           content:
             '*/*':
               schema:
@@ -316,7 +378,7 @@ paths:
                   $ref: "#/components/schemas/User"
   /groups/{groupId}/members/admins/{memberId}:
     delete:
-      description: ""
+      description: "Remove member as an admin of the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -336,22 +398,22 @@ paths:
               schema:
                 type: "string"
               examples:
-                Example#1:
+                Missing member ID:
                   value: "Missing member ID"
         "404":
-          description: "Not Found"
+          description: "Group could not be found for user"
           content:
             '*/*':
               schema:
                 type: "object"
         "405":
-          description: "Method Not Allowed"
+          description: "The member is the owner of the group"
           content:
             '*/*':
               schema:
                 type: "string"
               examples:
-                Example#1:
+                Member is owner:
                   value: "Cannot change role of owner"
         "200":
           description: "OK"
@@ -360,14 +422,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/GroupMembership"
     get:
-      description: ""
+      description: "Retrieves the membership detail of the admin"
       parameters:
       - name: "groupId"
         in: "path"
         required: true
         schema:
           type: "string"
-      - name: "memberId"
+      - name: "adminId"
         in: "path"
         required: true
         schema:
@@ -380,10 +442,10 @@ paths:
               schema:
                 type: "string"
               examples:
-                Example#1:
+                Admin ID missing:
                   value: "Missing admin ID"
         "404":
-          description: "Not Found"
+          description: "Group could not be found for user, or user is not admin of the group"
           content:
             '*/*':
               schema:
@@ -395,7 +457,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GroupMembership"
     post:
-      description: ""
+      description: "Makes the user an admin of the group"
       parameters:
       - name: "groupId"
         in: "path"
@@ -415,10 +477,10 @@ paths:
               schema:
                 type: "string"
               examples:
-                Example#1:
+                Missing member ID:
                   value: "Missing member ID"
         "404":
-          description: "Not Found"
+          description: "Group could not be found for user, or user is not admin of the group"
           content:
             '*/*':
               schema:
@@ -430,7 +492,7 @@ paths:
               schema:
                 type: "string"
               examples:
-                Example#1:
+                User is owner:
                   value: "Cannot change role of owner"
         "200":
           description: "OK"
@@ -438,25 +500,28 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GroupMembership"
-  /home:
+  /token:
     get:
       description: ""
       responses:
-        "302":
-          description: "Found <br> Redirect"
+        "401":
+          description: "User is not logged in"
           content:
-            text/plain:
+            '*/*':
               schema:
-                $ref: "#/components/schemas/Url"
+                type: "string"
         "200":
-          description: "OK"
+          description: "The bearer token"
           content:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example token:
+                  value: "ya29.a0AcM612wPskMEKLkLGXQbZRiH9iRDOARWXgjarCtI1_e7-rCY-kkmLIZA3PRyQx8NS5mEmrcpOnUOaHjCkCHIN0IT0QfXWU7EQn-CGwMZyRQS3f2rJvx6FlKWrDIOL1vfVScFIoEDau-JUJL_eeuzhSMPgA7JPs0jDpVIaCgYKAS4SARESFQHGC6MilFzG-JsGTtQgtRCmQPIigQ0171"
   /users:
     get:
-      description: ""
+      description: "Retrieves the currently logged in user"
       responses:
         "200":
           description: "OK"
@@ -465,14 +530,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "404":
-          description: "Not Found"
+          description: "User could not be found"
           content:
             '*/*':
               schema:
                 type: "object"
   /users/{id}:
     get:
-      description: ""
+      description: "Retrieves the user"
       parameters:
       - name: "id"
         in: "path"
@@ -487,14 +552,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "404":
-          description: "Not Found"
+          description: "User could not be found for user"
           content:
             '*/*':
               schema:
                 type: "object"
   /wishes:
     get:
-      description: ""
+      description: "Retrieves all wishes that (a) is public, (b) is created by user, or (c) the user has access to through a group membership."
       responses:
         "200":
           description: "OK"
@@ -505,7 +570,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Wish"
     post:
-      description: ""
+      description: "Creates a new wish for the user"
       requestBody:
         content:
           application/json:
@@ -527,7 +592,7 @@ paths:
                 type: "object"
   /wishes/{id}:
     delete:
-      description: ""
+      description: "Deletes the wish"
       parameters:
       - name: "id"
         in: "path"
@@ -548,14 +613,14 @@ paths:
               schema:
                 type: "object"
         "200":
-          description: "OK"
+          description: "The number of wishes deleted"
           content:
             '*/*':
               schema:
                 type: "integer"
                 format: "int32"
     get:
-      description: ""
+      description: "Retrieves the wish for the user"
       parameters:
       - name: "id"
         in: "path"
@@ -576,7 +641,7 @@ paths:
               schema:
                 type: "object"
     patch:
-      description: ""
+      description: "Updates the wish"
       parameters:
       - name: "id"
         in: "path"
@@ -604,7 +669,8 @@ paths:
                 type: "object"
   /wishes/occasion:
     get:
-      description: ""
+      security: []
+      description: "Retrieves the valid occasions for a wish"
       responses:
         "200":
           description: "OK"
@@ -616,7 +682,8 @@ paths:
                   type: "string"
   /wishes/status:
     get:
-      description: ""
+      security: []
+      description: "Retrieves all valid status for a wish"
       responses:
         "200":
           description: "OK"
@@ -628,7 +695,7 @@ paths:
                   type: "string"
   /appLogin:
     post:
-      description: ""
+      description: "After the user has logged in through the app, this endpoint is used add the user to the API."
       requestBody:
         content:
           application/json:
@@ -642,48 +709,10 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/User"
-  /basic:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-  /bearer:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-  /callback:
-    get:
-      description: ""
-      responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "/home"
+
   /confirmInvite/{inviteId}:
     get:
-      description: ""
+      description: "The link the user presses to confirm the invite"
       parameters:
       - name: "inviteId"
         in: "path"
@@ -692,34 +721,18 @@ paths:
           type: "string"
       responses:
         "302":
-          description: "Found <br> Redirect"
+          description: "Redirect to login"
           content:
             text/plain:
               schema:
                 type: "string"
-              examples:
-                Example#1:
-                  value: "/login"
+
   /login:
     get:
-      description: ""
-  /json/kotlinx-serialization:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Map_String"
+      description: "Redirect google login"
+
 components:
   schemas:
-    Function1:
-      type: "object"
-      properties: {}
-    Function1_? super HTML:
-      type: "object"
     User:
       type: "object"
       properties:
@@ -912,8 +925,8 @@ components:
       - "email"
       - "photoUrl"
       - "accessToken"
-    Map:
-      type: "object"
-      properties: {}
-    Map_String:
-      type: "string"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

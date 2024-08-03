@@ -1,8 +1,10 @@
 package klev.plugins
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.delete
@@ -26,13 +28,16 @@ fun Application.configureRouting(
     userRoutes: UserRoutes,
 ) {
     routing {
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
         get("/") {
             mainHtml()
         }
-        get("/home") {
+        get("/token") {
             val userSession = getSession(call)
             if (userSession != null) {
                 call.respondText(userSession.session.token)
+            } else {
+                call.respond(HttpStatusCode.Unauthorized)
             }
         }
         get("/wishes/status") {

@@ -146,7 +146,7 @@ fun Application.configureSecurity(
                 call.sessions.get<InviteData>()?.inviteId?.let { inviteId ->
                     user?.id?.let { userId -> invitationService.completeInvitation(inviteId, userId) }
                 }
-                call.respondRedirect("/home")
+                call.respondRedirect("/token")
             }
         }
     }
