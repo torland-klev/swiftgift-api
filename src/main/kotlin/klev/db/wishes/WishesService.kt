@@ -9,6 +9,7 @@ import klev.db.wishes.Wishes.description
 import klev.db.wishes.Wishes.img
 import klev.db.wishes.Wishes.occasion
 import klev.db.wishes.Wishes.status
+import klev.db.wishes.Wishes.title
 import klev.db.wishes.Wishes.updated
 import klev.db.wishes.Wishes.url
 import klev.db.wishes.Wishes.userId
@@ -37,6 +38,7 @@ class WishesService(
         statement[url] = obj.url
         statement[img] = obj.img
         statement[visibility] = obj.visibility
+        statement[title] = obj.title
     }
 
     override suspend fun readMap(input: ResultRow): Wish =
@@ -49,6 +51,7 @@ class WishesService(
             status = input[status],
             img = input[img],
             visibility = input[visibility],
+            title = input[title],
         )
 
     override fun updateMap(
@@ -63,6 +66,7 @@ class WishesService(
         update[img] = obj.img
         update[visibility] = obj.visibility
         update[updated] = CurrentTimestamp()
+        update[title] = obj.title
     }
 
     override suspend fun allOwnedByUser(userId: UUID?) = super.allOwnedByUser(userId).filterNot { it.status == Status.DELETED }
@@ -91,6 +95,7 @@ class WishesService(
                     description = partial.description ?: existing.description,
                     img = partial.img ?: existing.img,
                     visibility = visibility ?: existing.visibility,
+                    title = partial.title ?: existing.title,
                 ),
             )
         }
@@ -122,6 +127,7 @@ class WishesService(
                     url = partial.url,
                     img = partial.img,
                     visibility = partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE,
+                    title = partial.title!!,
                 ),
             )
 

@@ -55,11 +55,14 @@ class WishesRoutes(
     suspend fun post(call: ApplicationCall) {
         call.oauthUserId()?.let { userId ->
             val partialWish = call.receive<PartialWish>()
-
-            call.respond(
-                HttpStatusCode.Created,
-                wishesService.createByPartial(partial = partialWish, userId = userId),
-            )
+            if (partialWish.title == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing required field title")
+            } else {
+                call.respond(
+                    HttpStatusCode.Created,
+                    wishesService.createByPartial(partial = partialWish, userId = userId),
+                )
+            }
         } ?: call.respond(HttpStatusCode.Unauthorized)
     }
 

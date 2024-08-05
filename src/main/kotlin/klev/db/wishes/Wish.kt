@@ -11,6 +11,7 @@ data class Wish(
     val occasion: Occasion,
     val status: Status = Status.OPEN,
     val url: String?,
+    val title: String,
     val description: String?,
     val img: String?,
     val visibility: WishVisibility = WishVisibility.PRIVATE,
