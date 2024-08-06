@@ -17,6 +17,8 @@ import klev.db.groups.groupsToWishes.GroupsToWishesService
 import klev.db.groups.invitations.InvitationService
 import klev.db.groups.memberships.GroupMembershipRoutes
 import klev.db.groups.memberships.GroupMembershipService
+import klev.db.images.ImageRoutes
+import klev.db.images.ImageService
 import klev.db.users.UserRoutes
 import klev.db.users.UserService
 import klev.db.users.google.GoogleUserService
@@ -51,6 +53,7 @@ val database =
         password = env["DB_PASSWORD"],
     )
 
+private val imageService = ImageService(database)
 private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 private val groupsToWishesService = GroupsToWishesService(database = database)
@@ -103,5 +106,6 @@ fun Application.module() {
                 userService = userService,
                 groupMembershipService = groupMembershipService,
             ),
+        imageRoutes = ImageRoutes(imageService),
     )
 }

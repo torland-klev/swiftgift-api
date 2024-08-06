@@ -15,6 +15,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import klev.db.groups.GroupsRoutes
 import klev.db.groups.memberships.GroupMembershipRoutes
+import klev.db.images.ImageRoutes
 import klev.db.users.UserRoutes
 import klev.db.wishes.Occasion
 import klev.db.wishes.Status
@@ -26,6 +27,7 @@ fun Application.configureRouting(
     groupsRoutes: GroupsRoutes,
     groupMembershipRoutes: GroupMembershipRoutes,
     userRoutes: UserRoutes,
+    imageRoutes: ImageRoutes,
 ) {
     routing {
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
@@ -45,6 +47,12 @@ fun Application.configureRouting(
         }
         get("/wishes/occasion") {
             call.respond(Occasion.entries.map { it.name })
+        }
+        get("/images/{id}") {
+            val userSession = getSession(call)
+            if (userSession != null) {
+                imageRoutes.getById(call, userSession)
+            }
         }
         authenticate("auth-bearer") {
             route("/groups") {
@@ -123,6 +131,19 @@ fun Application.configureRouting(
                     }
                     patch {
                         wishesRoutes.patch(call)
+                    }
+                }
+            }
+            route("/images") {
+                post {
+                    imageRoutes.post(call)
+                }
+                route("/{id}") {
+                    get {
+                        imageRoutes.getById(call)
+                    }
+                    delete {
+                        imageRoutes.deleteById(call)
                     }
                 }
             }
