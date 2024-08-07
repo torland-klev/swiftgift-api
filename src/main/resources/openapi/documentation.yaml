@@ -731,6 +731,86 @@ paths:
     get:
       description: "Redirect google login"
 
+  /images:
+    post:
+      description: "Uploads a new image"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              properties:
+                image:
+                  type: "string"
+                  format: "binary"
+        required: true
+      responses:
+        "200":
+          description: "Returns image ID"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "400":
+          description: "Bad request, possibly due to missing image file"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "401":
+          description: "Unauthorized"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+
+  /images/{id}:
+    get:
+      description: "Retrieves an image by ID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/octet-stream:
+              schema:
+                type: "string"
+                format: "binary"
+        "404":
+          description: "Image not found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+
+    delete:
+      description: "Deletes an image by ID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Rows deleted"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+        "404":
+          description: "Image not found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+
 components:
   schemas:
     User:
