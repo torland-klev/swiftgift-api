@@ -745,7 +745,7 @@ paths:
                   format: "binary"
         required: true
       responses:
-        "200":
+        "201":
           description: "Returns image ID"
           content:
             text/plain:

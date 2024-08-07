@@ -61,7 +61,7 @@ class ImageRoutes(
                             fileType = contentType,
                         ),
                     )
-                call.respond(HttpStatusCode.OK, created.id.toString())
+                call.respond(HttpStatusCode.Created, created.id.toString())
             }
 
                 ?: call.respond(HttpStatusCode.BadRequest, "No image found in the request")
