@@ -55,6 +55,9 @@ fun Application.configureRouting(
             }
         }
         authenticate("auth-bearer") {
+            get("/me") {
+                userRoutes.me(call)
+            }
             route("/groups") {
                 get {
                     groupsRoutes.all(call)

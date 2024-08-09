@@ -81,13 +81,31 @@ paths:
                         </div>
                     </body>
                     </html>
+  /me:
+    get:
+      description: "Retrieves the user object of the logged in user"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+        "404":
+          description: "No logged in user found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
 
   /groups:
     get:
-      description: ""
+      description: "Retrieves all groups that (a) is public, (b) is created by user, or (c) the user is a member of."
       responses:
         "200":
-          description: "Retrieves all groups that (a) is public, (b) is created by user, or (c) the user is a member of."
+          description: "OK"
           content:
             '*/*':
               schema:
@@ -95,7 +113,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Group"
     post:
-      description: ""
+      description: "Creates a new group"
       requestBody:
         content:
           application/json:

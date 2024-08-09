@@ -33,4 +33,10 @@ class UserRoutes(
             } ?: call.respond(HttpStatusCode.NotFound)
         }
     }
+
+    suspend fun me(call: ApplicationCall) {
+        userService.read(call.oauthUserId())?.let {
+            call.respond(HttpStatusCode.OK, it)
+        } ?: call.respond(HttpStatusCode.NotFound)
+    }
 }
