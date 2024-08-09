@@ -48,7 +48,7 @@ fun Application.configureRouting(
         get("/wishes/occasion") {
             call.respond(Occasion.entries.map { it.name })
         }
-        get("/images/{id}") {
+        get("/view-image/{id}") {
             val userSession = getSession(call)
             if (userSession != null) {
                 imageRoutes.getById(call, userSession)
