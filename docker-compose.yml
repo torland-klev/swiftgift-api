@@ -5,13 +5,25 @@ services:
     image: postgres:latest
     container_name: postgres_db
     environment:
-      POSTGRES_USER: api
-      POSTGRES_PASSWORD: secretgaveliste
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: gaveliste
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+  image_db:
+    image: postgres:latest
+    container_name: images_postgres_db
+    environment:
+      POSTGRES_USER: ${IMG_DB_USER}
+      POSTGRES_PASSWORD: ${IMG_DB_PASSWORD}
+      POSTGRES_DB: swiftgift_images
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_images:/var/lib/postgresql/images
 
   certbot:
     image: certbot/certbot
@@ -36,3 +48,4 @@ services:
 
 volumes:
   db_data:
+  db_images:

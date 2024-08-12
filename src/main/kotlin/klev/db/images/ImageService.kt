@@ -1,16 +1,21 @@
 package klev.db.images
 
 import io.ktor.http.ContentType
-import klev.db.UserCRUD
+import klev.db.CRUD
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import java.util.UUID
 
 class ImageService(
     database: Database,
-) : UserCRUD<Image>(database, Images) {
+) : CRUD<Image>(database, Images) {
     override suspend fun readMap(input: ResultRow) =
         Image(
             id = input[Images.id].value,
@@ -39,5 +44,27 @@ class ImageService(
         update[Images.image] = obj.image
         update[Images.fileType] = obj.fileType?.toString()
         update[Images.updated] = CurrentTimestamp()
+    }
+
+    suspend fun read(
+        id: UUID?,
+        userId: UUID?,
+    ) = if (id == null || userId == null) {
+        null
+    } else {
+        dbQuery {
+            Images.select { (Images.userId eq userId) and (Images.id eq id) }.map { readMap(it) }.singleOrNull()
+        }
+    }
+
+    suspend fun delete(
+        id: UUID?,
+        userId: UUID?,
+    ) = if (id == null || userId == null) {
+        0
+    } else {
+        dbQuery {
+            Images.deleteWhere { (Images.userId eq userId) and (Images.id eq id) }
+        }
     }
 }

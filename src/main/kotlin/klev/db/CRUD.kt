@@ -18,7 +18,7 @@ import org.jetbrains.exposed.sql.update
 import java.util.UUID
 
 abstract class CRUD<T>(
-    database: Database,
+    private val database: Database,
     private val table: UUIDTable,
 ) {
     init {
@@ -88,5 +88,5 @@ abstract class CRUD<T>(
             table.deleteWhere { table.id eq id } > 0
         }
 
-    protected suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
+    protected suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO, database) { block() }
 }

@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
 class GoogleUserService(
-    database: Database,
+    private val database: Database,
 ) {
     init {
         transaction(database) {
@@ -19,7 +19,7 @@ class GoogleUserService(
         }
     }
 
-    private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
+    private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO, database) { block() }
 
     private suspend fun read(id: String): GoogleUser? =
         dbQuery {

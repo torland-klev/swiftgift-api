@@ -45,7 +45,7 @@ val applicationHttpClient =
         }
     }
 
-val database =
+private val database =
     Database.connect(
         url = env["DB_URL"],
         user = env["DB_USER"],
@@ -53,7 +53,15 @@ val database =
         password = env["DB_PASSWORD"],
     )
 
-private val imageService = ImageService(database)
+private val images =
+    Database.connect(
+        url = env["IMG_DB_URL"],
+        user = env["IMG_DB_USER"],
+        driver = env["IMG_DB_DRIVER"],
+        password = env["IMG_DB_PASSWORD"],
+    )
+
+private val imageService = ImageService(images)
 private val googleUserService = GoogleUserService(database)
 private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
 private val groupsToWishesService = GroupsToWishesService(database = database)

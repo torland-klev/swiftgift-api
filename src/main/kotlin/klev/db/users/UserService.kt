@@ -17,7 +17,7 @@ import org.jetbrains.exposed.sql.update
 import java.util.UUID
 
 class UserService(
-    database: Database,
+    private val database: Database,
     private val googleUserService: GoogleUserService,
     private val httpClient: HttpClient,
 ) {
@@ -27,7 +27,7 @@ class UserService(
         }
     }
 
-    private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
+    private suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO, database) { block() }
 
     private suspend fun create(user: User): UUID =
         dbQuery {
