@@ -37,9 +37,9 @@ import io.ktor.server.sessions.set
 import klev.db.groups.invitations.InvitationService
 import klev.db.users.InviteData
 import klev.db.users.UserAndSession
-import klev.db.users.UserProvider
 import klev.db.users.UserService
 import klev.db.users.UserSession
+import klev.db.users.apple.AppleUser
 import klev.db.users.google.GoogleAppUser
 import klev.oauthUserId
 import java.util.UUID
@@ -97,10 +97,17 @@ fun Application.configureSecurity(
         }
     }
     routing {
-        route("/appLogin") {
+        route("/appLogin/apple") {
+            post {
+                val appUser = call.receive<AppleUser>()
+                val user = userService.createOrUpdate(appleUser = appUser)
+                call.respond(HttpStatusCode.OK, user)
+            }
+        }
+        route("/appLogin/google") {
             post {
                 val appUser = call.receive<GoogleAppUser>()
-                val user = userService.createOrUpdate(token = appUser.accessToken, provider = UserProvider.GOOGLE)
+                val user = userService.createOrUpdate(googleAppUser = appUser)
                 call.respond(HttpStatusCode.OK, user)
             }
         }
@@ -137,7 +144,7 @@ fun Application.configureSecurity(
                     currentPrincipal?.let { principal ->
                         principal.state?.let { state ->
                             val session = UserSession(state, principal.accessToken)
-                            val user = userService.createOrUpdate(session = session, provider = UserProvider.GOOGLE)
+                            val user = userService.createOrUpdate(session = session)
                             call.sessions.set(UserAndSession(user = user, session = session))
                             user
                         }

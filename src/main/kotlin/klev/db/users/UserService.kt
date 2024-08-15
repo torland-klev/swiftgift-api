@@ -2,6 +2,10 @@ package klev.db.users
 
 import io.ktor.client.HttpClient
 import io.ktor.server.auth.BearerTokenCredential
+import klev.db.users.apple.AppleUser
+import klev.db.users.apple.AppleUserService
+import klev.db.users.apple.UsersToAppleUsers
+import klev.db.users.google.GoogleAppUser
 import klev.db.users.google.GoogleUser
 import klev.db.users.google.GoogleUserService
 import klev.db.users.google.UsersToGoogleUsers
@@ -18,12 +22,13 @@ import java.util.UUID
 
 class UserService(
     private val database: Database,
+    private val appleUserService: AppleUserService,
     private val googleUserService: GoogleUserService,
     private val httpClient: HttpClient,
 ) {
     init {
         transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Users, UsersToGoogleUsers)
+            SchemaUtils.createMissingTablesAndColumns(Users, UsersToGoogleUsers, UsersToAppleUsers)
         }
     }
 
@@ -72,6 +77,26 @@ class UserService(
         }
     }
 
+    private suspend fun getUserFromAppleUser(appleUser: AppleUser): User? {
+        val userId =
+            dbQuery {
+                UsersToAppleUsers
+                    .select {
+                        UsersToAppleUsers.appleUserId eq appleUser.userIdentifier
+                    }.singleOrNull()
+                    ?.getOrNull(UsersToAppleUsers.userId)
+            }
+        return if (userId != null) {
+            read(
+                dbQuery {
+                    userId
+                },
+            )
+        } else {
+            null
+        }
+    }
+
     private suspend fun GoogleUser.toUser(token: String) =
         getUserFromGoogleUser(this)?.also {
             updateAuthToken(this, token)
@@ -93,6 +118,21 @@ class UserService(
             },
         )!!
 
+    private suspend fun AppleUser.toUser() =
+        getUserFromAppleUser(this) ?: read(
+            create(
+                User(firstName = this.givenName ?: "Steve", lastName = this.familyName ?: "Jobs", email = this.email ?: "steve@apple.com"),
+            ).also { uid ->
+                dbQuery {
+                    UsersToAppleUsers.insert {
+                        it[userId] = uid
+                        it[appleUserId] = this@toUser.userIdentifier
+                        it[authToken] = this@toUser.identityToken
+                    }
+                }
+            },
+        )!!
+
     private suspend fun updateAuthToken(
         googleUser: GoogleUser,
         token: String,
@@ -105,20 +145,8 @@ class UserService(
         }
     }
 
-    suspend fun createOrUpdate(
-        session: UserSession,
-        provider: UserProvider,
-    ) = createOrUpdate(token = session.token, provider = provider)
-
-    suspend fun createOrUpdate(
-        token: String,
-        provider: UserProvider,
-    ): User =
-        when (provider) {
-            UserProvider.GOOGLE -> {
-                googleUserService.createOrUpdate(googleUser = GoogleUser.fromSession(httpClient, token)).toUser(token)
-            }
-        }
+    suspend fun createOrUpdate(session: UserSession) =
+        googleUserService.createOrUpdate(googleUser = GoogleUser.fromSession(httpClient, session.token)).toUser(session.token)
 
     suspend fun getUserByToken(tokenCredential: BearerTokenCredential) =
         dbQuery {
@@ -127,4 +155,12 @@ class UserService(
                 .singleOrNull()
                 ?.get(UsersToGoogleUsers.userId)
         }?.let { read(it) }
+
+    suspend fun createOrUpdate(appleUser: AppleUser) = appleUserService.createOrUpdate(appleUser).toUser()
+
+    suspend fun createOrUpdate(googleAppUser: GoogleAppUser) =
+        googleUserService
+            .createOrUpdate(
+                googleUser = GoogleUser.fromSession(httpClient, googleAppUser.accessToken),
+            ).toUser(googleAppUser.accessToken)
 }

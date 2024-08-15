@@ -711,9 +711,9 @@ paths:
                 type: "array"
                 items:
                   type: "string"
-  /appLogin:
+  /appLogin/google:
     post:
-      description: "After the user has logged in through the app, this endpoint is used add the user to the API."
+      description: "After the user has logged in through the app via Google, this endpoint is used add the user to the API."
       requestBody:
         content:
           application/json:

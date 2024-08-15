@@ -21,6 +21,7 @@ import klev.db.images.ImageRoutes
 import klev.db.images.ImageService
 import klev.db.users.UserRoutes
 import klev.db.users.UserService
+import klev.db.users.apple.AppleUserService
 import klev.db.users.google.GoogleUserService
 import klev.db.wishes.WishesRoutes
 import klev.db.wishes.WishesService
@@ -62,8 +63,15 @@ private val images =
     )
 
 private val imageService = ImageService(images)
+private val appleUserService = AppleUserService(database)
 private val googleUserService = GoogleUserService(database)
-private val userService = UserService(database = database, httpClient = applicationHttpClient, googleUserService = googleUserService)
+private val userService =
+    UserService(
+        database = database,
+        appleUserService = appleUserService,
+        httpClient = applicationHttpClient,
+        googleUserService = googleUserService,
+    )
 private val groupsToWishesService = GroupsToWishesService(database = database)
 private val groupMembershipService = GroupMembershipService(database)
 private val groupService = GroupService(database = database, groupMembershipService = groupMembershipService, userService = userService)
