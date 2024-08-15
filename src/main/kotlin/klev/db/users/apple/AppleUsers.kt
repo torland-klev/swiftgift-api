@@ -6,9 +6,9 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 object AppleUsers : Table() {
     val id = varchar("id", length = 63)
-    val givenName = varchar("givenName", length = 63).nullable()
-    val familyName = varchar("familyName", length = 63).nullable()
-    val email = varchar("email", length = 127).nullable()
+    val givenName = varchar("givenName", length = 63)
+    val familyName = varchar("familyName", length = 63)
+    val email = varchar("email", length = 127)
     val authorizationCode = varchar("authorizationCode", length = 127)
     val identityToken = varchar("identityToken", length = 511)
 

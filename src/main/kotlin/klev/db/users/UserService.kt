@@ -121,7 +121,7 @@ class UserService(
     private suspend fun AppleUser.toUser() =
         getUserFromAppleUser(this) ?: read(
             create(
-                User(firstName = this.givenName ?: "Steve", lastName = this.familyName ?: "Jobs", email = this.email ?: "steve@apple.com"),
+                User(firstName = this.givenName, lastName = this.familyName, email = this.email),
             ).also { uid ->
                 dbQuery {
                     UsersToAppleUsers.insert {
