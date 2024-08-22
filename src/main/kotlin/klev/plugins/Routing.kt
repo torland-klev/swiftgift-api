@@ -106,6 +106,14 @@ fun Application.configureRouting(
                             }
                         }
                     }
+                    route("/wishes") {
+                        get {
+                            groupsRoutes.allWishes(call)
+                        }
+                        post {
+                            wishesRoutes.postForGroup(call)
+                        }
+                    }
                 }
             }
             route("/users") {

@@ -518,6 +518,41 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GroupMembership"
+
+  /groups/{groupId}/wishes:
+    get:
+      description: "Retrieves all wishes the user has access to through the group membership."
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Wish"
+    post:
+      description: "Creates a new wish for the user and group"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialWishForGroup"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Wish"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+
   /token:
     get:
       description: ""
@@ -1006,6 +1041,23 @@ components:
         visibility:
           type: "string"
         groupId:
+          type: "string"
+      required:
+        - title
+    PartialWishForGroup:
+      type: "object"
+      properties:
+        occasion:
+          type: "string"
+        url:
+          type: "string"
+        title:
+          type: "string"
+        description:
+          type: "string"
+        status:
+          type: "string"
+        img:
           type: "string"
       required:
         - title

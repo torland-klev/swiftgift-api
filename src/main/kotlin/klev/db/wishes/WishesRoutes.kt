@@ -73,4 +73,19 @@ class WishesRoutes(
                 wishesService.allUserHasGroupAccessTo(call.oauthUserId())
         call.respond(wishes.toSet())
     }
+
+    suspend fun postForGroup(call: ApplicationCall) {
+        call.oauthUserId()?.let { userId ->
+            val groupId = call.routeId("groupId") ?: call.respond(HttpStatusCode.BadRequest, "Missing required field groupId")
+            val partialWish = call.receive<PartialWish>().copy(groupId = groupId.toString(), visibility = WishVisibility.GROUP.name)
+            if (partialWish.title == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing required field title")
+            } else {
+                call.respond(
+                    HttpStatusCode.Created,
+                    wishesService.createByPartial(partial = partialWish, userId = userId),
+                )
+            }
+        } ?: call.respond(HttpStatusCode.Unauthorized)
+    }
 }

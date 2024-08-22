@@ -126,7 +126,9 @@ class WishesService(
                     description = partial.description,
                     url = partial.url,
                     img = partial.img,
-                    visibility = partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) } ?: WishVisibility.PRIVATE,
+                    visibility =
+                        partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) }
+                            ?: if (partial.groupId == null) WishVisibility.PRIVATE else WishVisibility.GROUP,
                     title = partial.title!!,
                 ),
             )
@@ -159,6 +161,25 @@ class WishesService(
                     } else {
                         null
                     }
+                }
+            }
+        }
+
+    suspend fun allByGroup(
+        userId: UUID?,
+        groupId: UUID,
+    ): Collection<Wish> =
+        if (userId == null) {
+            emptySet()
+        } else {
+            val groupMembership = groupMembershipService.byGroupAndUser(groupId = groupId, userId = userId)
+            if (groupMembership == null) {
+                emptySet()
+            } else {
+                groupsToWishesService.allByGroup(groupMembership.groupId).mapNotNull { read(it.wishId) }.filterNot {
+                    it.visibility ==
+                        WishVisibility.PRIVATE &&
+                        it.userId != userId
                 }
             }
         }

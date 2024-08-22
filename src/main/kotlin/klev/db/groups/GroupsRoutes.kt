@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import klev.db.groups.invitations.InvitationService
 import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserService
+import klev.db.wishes.WishesService
 import klev.oauthUserId
 import klev.routeId
 
@@ -15,6 +16,7 @@ class GroupsRoutes(
     private val userService: UserService,
     private val groupMembershipService: GroupMembershipService,
     private val invitationService: InvitationService,
+    private val wishesService: WishesService,
 ) {
     suspend fun all(call: ApplicationCall) {
         val groups =
@@ -121,6 +123,17 @@ class GroupsRoutes(
                     )
                 call.respond(HttpStatusCode.Created, invite.inviteUrl())
             }
+        }
+    }
+
+    suspend fun allWishes(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val user = userService.read(userId)
+        if (user == null || groupId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            call.respond(HttpStatusCode.OK, wishesService.allByGroup(userId = userId, groupId = groupId))
         }
     }
 }

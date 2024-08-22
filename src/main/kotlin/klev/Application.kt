@@ -113,6 +113,7 @@ fun Application.module() {
                 userService = userService,
                 groupMembershipService = groupMembershipService,
                 invitationService = invitationService,
+                wishesService = wishesService,
             ),
         userRoutes = UserRoutes(userService = userService),
         wishesRoutes = WishesRoutes(wishesService = wishesService),
