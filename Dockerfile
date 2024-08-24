@@ -1,5 +1,4 @@
-ARG JAR_FILE
 FROM amazoncorretto:22-headless
-COPY $JAR_FILE $JAR_FILE
+COPY swiftgift-api.jar swiftgift-api.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "$JAR_FILE"]
+ENTRYPOINT ["java", "-jar", "swiftgift-api.jar"]
