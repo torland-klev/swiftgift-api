@@ -1,1 +1,1 @@
-rootProject.name = "gaveliste-api"
+rootProject.name = "swiftgift-api"
