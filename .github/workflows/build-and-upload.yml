@@ -74,5 +74,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: "JAR_FILE=swiftgift-api.jar"
           cache-from: type=gha
           cache-to: type=gha,mode=max
