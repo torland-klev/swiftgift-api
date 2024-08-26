@@ -4,6 +4,7 @@ import klev.db.users.google.GoogleUsers
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.select
@@ -73,4 +74,18 @@ class AppleUserService(
             read(create(user))!!
         }
     }
+
+    suspend fun read(appleUserDTO: AppleUserDTO) =
+        dbQuery {
+            AppleUsers
+                .select {
+                    (AppleUsers.authorizationCode eq appleUserDTO.authorizationCode) and (AppleUsers.id eq appleUserDTO.userIdentifier)
+                }.singleOrNull()
+                ?.get(AppleUsers.id)
+                ?.let {
+                    read(
+                        it,
+                    )
+                }
+        }
 }

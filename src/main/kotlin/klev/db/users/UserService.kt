@@ -3,6 +3,7 @@ package klev.db.users
 import io.ktor.client.HttpClient
 import io.ktor.server.auth.BearerTokenCredential
 import klev.db.users.apple.AppleUser
+import klev.db.users.apple.AppleUserDTO
 import klev.db.users.apple.AppleUserService
 import klev.db.users.apple.UsersToAppleUsers
 import klev.db.users.google.GoogleAppUser
@@ -163,4 +164,6 @@ class UserService(
             .createOrUpdate(
                 googleUser = GoogleUser.fromSession(httpClient, googleAppUser.accessToken),
             ).toUser(googleAppUser.accessToken)
+
+    suspend fun read(appleUserDTO: AppleUserDTO) = appleUserService.read(appleUserDTO = appleUserDTO)?.toUser()
 }

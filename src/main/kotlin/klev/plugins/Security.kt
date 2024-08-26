@@ -39,7 +39,7 @@ import klev.db.users.InviteData
 import klev.db.users.UserAndSession
 import klev.db.users.UserService
 import klev.db.users.UserSession
-import klev.db.users.apple.AppleUser
+import klev.db.users.apple.AppleUserDTO
 import klev.db.users.google.GoogleAppUser
 import klev.oauthUserId
 import java.util.UUID
@@ -99,9 +99,20 @@ fun Application.configureSecurity(
     routing {
         route("/appLogin/apple") {
             post {
-                val appUser = call.receive<AppleUser>()
-                val user = userService.createOrUpdate(appleUser = appUser)
-                call.respond(HttpStatusCode.OK, user)
+                val appUserDto = call.receive<AppleUserDTO>()
+                val user =
+                    if (appUserDto.isFirstTimeLogin()) {
+                        userService.createOrUpdate(
+                            appleUser = appUserDto.toAppUser(),
+                        )
+                    } else {
+                        userService.read(appleUserDTO = appUserDto)
+                    }
+                if (user == null) {
+                    call.respond(HttpStatusCode.Unauthorized)
+                } else {
+                    call.respond(HttpStatusCode.OK, user)
+                }
             }
         }
         route("/appLogin/google") {

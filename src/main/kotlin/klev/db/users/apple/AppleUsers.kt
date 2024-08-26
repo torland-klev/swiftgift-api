@@ -10,7 +10,7 @@ object AppleUsers : Table() {
     val familyName = varchar("familyName", length = 63)
     val email = varchar("email", length = 127)
     val authorizationCode = varchar("authorizationCode", length = 127)
-    val identityToken = varchar("identityToken", length = 511)
+    val identityToken = varchar("identityToken", length = 1023)
 
     val created = timestamp("created").defaultExpression(CurrentTimestamp())
     val updated = timestamp("updated").defaultExpression(CurrentTimestamp())
