@@ -588,7 +588,7 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /users/{id}:
+  /users/{userId}:
     get:
       description: "Retrieves the user"
       parameters:
@@ -610,6 +610,20 @@ paths:
             '*/*':
               schema:
                 type: "object"
+
+  /users/{userId}/wishes:
+    get:
+      description: "Retrieves all wishes that is created by user."
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Wish"
+
   /wishes:
     get:
       description: "Retrieves all wishes that (a) is public, (b) is created by user, or (c) the user has access to through a group membership."

@@ -183,4 +183,6 @@ class WishesService(
                 }
             }
         }
+
+    suspend fun allUserHasReadAccessTo(userId: UUID?) = allPublic() + allOwnedByUser(userId) + allUserHasGroupAccessTo(userId)
 }

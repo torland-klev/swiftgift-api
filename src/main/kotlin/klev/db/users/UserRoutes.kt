@@ -22,7 +22,7 @@ class UserRoutes(
 
     suspend fun getById(call: ApplicationCall) {
         val oauthId = call.oauthUserId()
-        val id = call.routeId()
+        val id = call.routeId("userId")
         if (id == null || id != oauthId) {
             userService.read(id)?.let {
                 call.respond(HttpStatusCode.OK, it.copy(email = "", lastName = ""))

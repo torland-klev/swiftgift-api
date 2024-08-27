@@ -120,9 +120,14 @@ fun Application.configureRouting(
                 get {
                     userRoutes.get(call)
                 }
-                route("/{id}") {
+                route("/{userId}") {
                     get {
                         userRoutes.getById(call)
+                    }
+                    route("/wishes") {
+                        get {
+                            wishesRoutes.allUserHasCreated(call)
+                        }
                     }
                 }
             }

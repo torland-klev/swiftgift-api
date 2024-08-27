@@ -67,11 +67,7 @@ class WishesRoutes(
     }
 
     suspend fun allUserHasReadAccessTo(call: ApplicationCall) {
-        val wishes =
-            wishesService.allPublic() +
-                wishesService.allOwnedByUser(call.oauthUserId()) +
-                wishesService.allUserHasGroupAccessTo(call.oauthUserId())
-        call.respond(wishes.toSet())
+        call.respond(wishesService.allUserHasReadAccessTo(call.oauthUserId()).toSet())
     }
 
     suspend fun postForGroup(call: ApplicationCall) {
@@ -87,5 +83,17 @@ class WishesRoutes(
                 )
             }
         } ?: call.respond(HttpStatusCode.Unauthorized)
+    }
+
+    suspend fun allUserHasCreated(call: ApplicationCall) {
+        call.oauthUserId()?.let { userId ->
+            val wishCreator = call.routeId("userId")
+            if (wishCreator == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing required field userId")
+            } else {
+                val wishes = wishesService.allUserHasReadAccessTo(userId).filter { it.userId == wishCreator }
+                call.respond(HttpStatusCode.OK, wishes.toSet())
+            }
+        }
     }
 }
