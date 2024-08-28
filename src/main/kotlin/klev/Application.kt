@@ -1,6 +1,5 @@
 package klev
 
-import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -32,10 +31,8 @@ import klev.plugins.configureSerialization
 import org.jetbrains.exposed.sql.Database
 import java.util.UUID
 
-val env = dotenv()
-
 fun main() {
-    embeddedServer(Netty, port = env["PORT"].toInt(), host = env["HOST"], module = Application::module)
+    embeddedServer(Netty, port = System.getenv("PORT").toInt(), host = System.getenv("HOST"), module = Application::module)
         .start(wait = true)
 }
 
@@ -48,18 +45,18 @@ val applicationHttpClient =
 
 private val database =
     Database.connect(
-        url = env["DB_URL"],
-        user = env["DB_USER"],
-        driver = env["DB_DRIVER"],
-        password = env["DB_PASSWORD"],
+        url = System.getenv("DB_URL"),
+        user = System.getenv("DB_USER"),
+        driver = System.getenv("DB_DRIVER"),
+        password = System.getenv("DB_PASSWORD"),
     )
 
 private val images =
     Database.connect(
-        url = env["IMG_DB_URL"],
-        user = env["IMG_DB_USER"],
-        driver = env["IMG_DB_DRIVER"],
-        password = env["IMG_DB_PASSWORD"],
+        url = System.getenv("IMG_DB_URL"),
+        user = System.getenv("IMG_DB_USER"),
+        driver = System.getenv("IMG_DB_DRIVER"),
+        password = System.getenv("IMG_DB_PASSWORD"),
     )
 
 private val imageService = ImageService(images)

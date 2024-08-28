@@ -1,7 +1,5 @@
 package klev.plugins
 
-import io.github.cdimascio.dotenv.Dotenv
-import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -49,16 +47,15 @@ fun Application.configureSecurity(
     userService: UserService,
     invitationService: InvitationService,
 ) {
-    val env = dotenv()
     install(Sessions) {
-        cookie<UserAndSession>(env["SESSION_COOKIE_NAME"])
+        cookie<UserAndSession>(System.getenv("SESSION_COOKIE_NAME"))
         cookie<InviteData>("invite_data")
     }
 
     install(Authentication) {
         basic("auth-basic") {
             validate {
-                if (it.isValid(env)) {
+                if (it.isValid()) {
                     UserIdPrincipal(it.name)
                 } else {
                     null
@@ -76,15 +73,15 @@ fun Application.configureSecurity(
             }
         }
         oauth("auth-oauth-google") {
-            urlProvider = { env["GOOGLE_CALLBACK_URL"] }
+            urlProvider = { System.getenv("GOOGLE_CALLBACK_URL") }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
                     authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
                     accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = env["GOOGLE_CLIENT_ID"],
-                    clientSecret = env["GOOGLE_CLIENT_SECRET"],
+                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
+                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
                     defaultScopes =
                         listOf(
                             "https://www.googleapis.com/auth/userinfo.profile",
@@ -170,7 +167,7 @@ fun Application.configureSecurity(
     }
 }
 
-fun UserPasswordCredential.isValid(env: Dotenv) = name == env["ADMIN_USERNAME"] && password == env["ADMIN_PASSWORD"]
+fun UserPasswordCredential.isValid() = name == System.getenv("ADMIN_USERNAME") && password == System.getenv("ADMIN_PASSWORD")
 
 suspend fun getSession(call: ApplicationCall): UserAndSession? {
     val userSession: UserAndSession? = call.sessions.get()
