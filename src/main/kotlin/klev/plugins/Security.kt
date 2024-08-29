@@ -39,6 +39,7 @@ import klev.db.users.UserService
 import klev.db.users.UserSession
 import klev.db.users.apple.AppleUserDTO
 import klev.db.users.google.GoogleAppUser
+import klev.env
 import klev.oauthUserId
 import java.util.UUID
 
@@ -48,7 +49,7 @@ fun Application.configureSecurity(
     invitationService: InvitationService,
 ) {
     install(Sessions) {
-        cookie<UserAndSession>(System.getenv("SESSION_COOKIE_NAME"))
+        cookie<UserAndSession>(env("SESSION_COOKIE_NAME"))
         cookie<InviteData>("invite_data")
     }
 
@@ -73,15 +74,15 @@ fun Application.configureSecurity(
             }
         }
         oauth("auth-oauth-google") {
-            urlProvider = { System.getenv("GOOGLE_CALLBACK_URL") }
+            urlProvider = { env("GOOGLE_CALLBACK_URL") }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
                     authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
                     accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
-                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
+                    clientId = env("GOOGLE_CLIENT_ID"),
+                    clientSecret = env("GOOGLE_CLIENT_SECRET"),
                     defaultScopes =
                         listOf(
                             "https://www.googleapis.com/auth/userinfo.profile",
@@ -167,7 +168,7 @@ fun Application.configureSecurity(
     }
 }
 
-fun UserPasswordCredential.isValid() = name == System.getenv("ADMIN_USERNAME") && password == System.getenv("ADMIN_PASSWORD")
+fun UserPasswordCredential.isValid() = name == env("ADMIN_USERNAME") && password == env("ADMIN_PASSWORD")
 
 suspend fun getSession(call: ApplicationCall): UserAndSession? {
     val userSession: UserAndSession? = call.sessions.get()

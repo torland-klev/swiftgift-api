@@ -1,5 +1,6 @@
 package klev.db.groups.invitations
 
+import klev.env
 import klev.plugins.UUIDSerializer
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
@@ -15,5 +16,5 @@ data class Invitation(
     @Serializable(with = UUIDSerializer::class) val groupId: UUID,
     val validUntil: Instant = now().plus(3.toDuration(DurationUnit.DAYS)),
 ) {
-    fun inviteUrl() = "${System.getenv("PUBLIC_URL")}/confirmInvite/$id"
+    fun inviteUrl() = "${env("PUBLIC_URL")}/confirmInvite/$id"
 }
