@@ -25,8 +25,10 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 1s
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d gaveliste'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   image_db:
     image: postgres:latest
@@ -40,8 +42,10 @@ services:
     volumes:
       - db_images:/var/lib/postgresql/images
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 1s
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${IMG_DB_USER} -d swiftgift_images'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   certbot:
     image: certbot/certbot
