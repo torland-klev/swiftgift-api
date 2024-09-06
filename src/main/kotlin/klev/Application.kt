@@ -11,6 +11,8 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import klev.db.auth.OneTimePasswordEmailService
+import klev.db.auth.OneTimePasswordService
 import klev.db.groups.GroupService
 import klev.db.groups.GroupsRoutes
 import klev.db.groups.groupsToWishes.GroupsToWishesService
@@ -38,6 +40,7 @@ fun main() {
 }
 
 private val dotenv = dotenv()
+
 fun env(key: String): String = System.getenv(key) ?: dotenv[key]
 
 val applicationHttpClient =
@@ -63,9 +66,11 @@ private val images =
         password = env("IMG_DB_PASSWORD"),
     )
 
-private val imageService = ImageService(images)
-private val appleUserService = AppleUserService(database)
-private val googleUserService = GoogleUserService(database)
+private val imageService = ImageService(database = images)
+private val appleUserService = AppleUserService(database = database)
+private val googleUserService = GoogleUserService(database = database)
+private val otpMailService = OneTimePasswordEmailService(httpClient = applicationHttpClient)
+private val otpService = OneTimePasswordService(database = database, emailService = otpMailService)
 private val userService =
     UserService(
         database = database,
@@ -74,7 +79,7 @@ private val userService =
         googleUserService = googleUserService,
     )
 private val groupsToWishesService = GroupsToWishesService(database = database)
-private val groupMembershipService = GroupMembershipService(database)
+private val groupMembershipService = GroupMembershipService(database = database)
 private val groupService = GroupService(database = database, groupMembershipService = groupMembershipService, userService = userService)
 private val invitationService = InvitationService(database = database, groupMembershipService = groupMembershipService)
 private val wishesService =
@@ -104,6 +109,7 @@ fun Application.module() {
         httpClient = applicationHttpClient,
         userService = userService,
         invitationService = invitationService,
+        otpService = otpService,
     )
     configureHTTP()
     configureSerialization()

@@ -3,6 +3,7 @@ val logbackVersion: String by project
 val exposedVersion: String by project
 val psqlVersion: String by project
 val dotenvVersion: String by project
+val angusMailVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -41,6 +42,8 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder")
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("io.ktor:ktor-server-swagger")
+
+    implementation("com.sun.mail:javax.mail:1.6.2")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")

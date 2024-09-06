@@ -19,7 +19,7 @@ paths:
           description: "OK"
           content:
             text/html:
-              type: object
+              type: string
               examples:
                 text/html:
                   description: "Landing page with google login"
@@ -760,7 +760,7 @@ paths:
                 type: "array"
                 items:
                   type: "string"
-  /appLogin/google:
+  /app/login/google:
     post:
       description: "After the user has logged in through the app via Google, this endpoint is used add the user to the API."
       requestBody:

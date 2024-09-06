@@ -166,4 +166,22 @@ class UserService(
             ).toUser(googleAppUser.accessToken)
 
     suspend fun read(appleUserDTO: AppleUserDTO) = appleUserService.read(appleUserDTO = appleUserDTO)?.toUser()
+
+    suspend fun getUserByEmail(email: String?): User? =
+        if (email == null) {
+            null
+        } else {
+            dbQuery {
+                Users
+                    .select { Users.email eq email }
+                    .map {
+                        User(
+                            id = it[Users.id].value,
+                            firstName = it[Users.firstName],
+                            lastName = it[Users.lastName],
+                            email = it[Users.email],
+                        )
+                    }.singleOrNull()
+            }
+        }
 }

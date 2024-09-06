@@ -32,6 +32,8 @@ import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import klev.db.auth.EmailLogin
+import klev.db.auth.OneTimePasswordService
 import klev.db.groups.invitations.InvitationService
 import klev.db.users.InviteData
 import klev.db.users.UserAndSession
@@ -47,6 +49,7 @@ fun Application.configureSecurity(
     httpClient: HttpClient,
     userService: UserService,
     invitationService: InvitationService,
+    otpService: OneTimePasswordService,
 ) {
     install(Sessions) {
         cookie<UserAndSession>(env("SESSION_COOKIE_NAME"))
@@ -95,7 +98,7 @@ fun Application.configureSecurity(
         }
     }
     routing {
-        route("/appLogin/apple") {
+        route("/app/login/apple") {
             post {
                 val appUserDto = call.receive<AppleUserDTO>()
                 val user =
@@ -113,11 +116,27 @@ fun Application.configureSecurity(
                 }
             }
         }
-        route("/appLogin/google") {
-            post {
+        route("/app/login") {
+            post("/google") {
                 val appUser = call.receive<GoogleAppUser>()
                 val user = userService.createOrUpdate(googleAppUser = appUser)
                 call.respond(HttpStatusCode.OK, user)
+            }
+            post("/email") {
+                val content = call.receive<EmailLogin>()
+                if (content.code == null) {
+                    otpService.generateAndSendOTP(content.email)
+                    call.respond(HttpStatusCode.OK)
+                } else if (otpService.isValid(content)) {
+                    val user = userService.getUserByEmail(content.email)
+                    if (user != null) {
+                        call.respond(HttpStatusCode.OK, user)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized)
+                }
             }
         }
         get("/confirmInvite/{inviteId}") {
