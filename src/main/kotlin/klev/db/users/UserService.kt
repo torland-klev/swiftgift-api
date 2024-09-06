@@ -1,5 +1,7 @@
 package klev.db.users
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.client.HttpClient
 import io.ktor.server.auth.BearerTokenCredential
 import klev.db.users.apple.AppleUser
@@ -9,7 +11,9 @@ import klev.db.users.apple.UsersToAppleUsers
 import klev.db.users.google.GoogleAppUser
 import klev.db.users.google.GoogleUser
 import klev.db.users.google.GoogleUserService
+import klev.db.users.google.UsersToEmailUsers
 import klev.db.users.google.UsersToGoogleUsers
+import klev.env
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -19,6 +23,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import java.util.Date
 import java.util.UUID
 
 class UserService(
@@ -29,7 +34,7 @@ class UserService(
 ) {
     init {
         transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Users, UsersToGoogleUsers, UsersToAppleUsers)
+            SchemaUtils.createMissingTablesAndColumns(Users, UsersToGoogleUsers, UsersToAppleUsers, UsersToEmailUsers)
         }
     }
 
@@ -155,6 +160,11 @@ class UserService(
                 .select { UsersToGoogleUsers.authToken eq tokenCredential.token }
                 .singleOrNull()
                 ?.get(UsersToGoogleUsers.userId)
+        }?.let { read(it) } ?: dbQuery {
+            UsersToEmailUsers
+                .select { UsersToEmailUsers.authToken eq tokenCredential.token }
+                .singleOrNull()
+                ?.get(UsersToEmailUsers.userId)
         }?.let { read(it) }
 
     suspend fun createOrUpdate(appleUser: AppleUser) = appleUserService.createOrUpdate(appleUser).toUser()
@@ -184,4 +194,31 @@ class UserService(
                     }.singleOrNull()
             }
         }
+
+    suspend fun getAuthTokenIfExistingUser(user: User) =
+        dbQuery {
+            UsersToGoogleUsers.select { UsersToGoogleUsers.userId eq user.id }.singleOrNull()?.get(UsersToGoogleUsers.authToken)
+        } ?: dbQuery {
+            UsersToEmailUsers.select { UsersToEmailUsers.userId eq user.id }.singleOrNull()?.get(UsersToEmailUsers.authToken)
+        }
+
+    private fun generateAuthToken(email: String) =
+        JWT
+            .create()
+            .withIssuer(env("APP_PUBLIC_NAME"))
+            .withSubject(email)
+            .withExpiresAt(Date(System.currentTimeMillis() + 3_600_000))
+            .sign(Algorithm.HMAC256(env("APP_SECRET")))
+
+    suspend fun createEmailUser(email: String): User {
+        val newUserId = create(User(email = email))
+        val newUser = requireNotNull(read(newUserId))
+        dbQuery {
+            UsersToEmailUsers.insert {
+                it[userId] = newUser.id
+                it[authToken] = generateAuthToken(email)
+            }
+        }
+        return newUser
+    }
 }

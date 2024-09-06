@@ -19,7 +19,7 @@ paths:
           description: "OK"
           content:
             text/html:
-              type: string
+              type: object
               examples:
                 text/html:
                   description: "Landing page with google login"
@@ -98,7 +98,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
 
   /groups:
     get:
@@ -126,13 +126,13 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "400":
           description: "Partial group is invalid. Will return appropriate validation error."
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
         "201":
           description: "Group is successfully created"
           content:
@@ -147,32 +147,32 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group could not be found for user"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "304":
           description: "Group could not be successfully deleted. Some data related to the group might still be deleted."
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "401":
           description: "User is not the owner of the group"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 User is not owner of group:
                   value: "Only group owners can delete a group"
@@ -183,14 +183,14 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group could not be found, or user does not have read access"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -204,7 +204,7 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       requestBody:
         content:
           application/json:
@@ -217,13 +217,13 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "400":
           description: "The request body does not contain a valid PartialGroup"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
         "200":
           description: "OK"
           content:
@@ -238,20 +238,20 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group is not found for user"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "201":
           description: "Invite is successfully created"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
   /groups/{groupId}/members:
     get:
       description: "Retrieves all members of group"
@@ -260,14 +260,14 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group is not found for user"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -284,31 +284,31 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "memberId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group, member or membership is not found"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "206":
           description: "Only some of the memberships of the member could be deleted"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
     get:
       description: "Retrieves the group membership for the member"
       parameters:
@@ -316,19 +316,19 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "memberId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group, member or membership is not found"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -342,19 +342,19 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "userId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "400":
           description: "User ID missing"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 Member ID missing:
                   value: "Missing member ID"
@@ -363,7 +363,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -378,14 +378,14 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "404":
           description: "Group could not be found for user"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -402,19 +402,19 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "memberId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "400":
           description: "Bad Request"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 Missing member ID:
                   value: "Missing member ID"
@@ -423,13 +423,13 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "405":
           description: "The member is the owner of the group"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 Member is owner:
                   value: "Cannot change role of owner"
@@ -446,19 +446,19 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "adminId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "400":
           description: "Bad Request"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 Admin ID missing:
                   value: "Missing admin ID"
@@ -467,7 +467,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "OK"
           content:
@@ -481,19 +481,19 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       - name: "memberId"
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "400":
           description: "Bad Request"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 Missing member ID:
                   value: "Missing member ID"
@@ -502,13 +502,13 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "405":
           description: "Method Not Allowed"
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
               examples:
                 User is owner:
                   value: "Cannot change role of owner"
@@ -551,7 +551,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
 
   /token:
     get:
@@ -562,13 +562,13 @@ paths:
           content:
             '*/*':
               schema:
-                type: "string"
+                type: string
         "200":
           description: "The bearer token"
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
               examples:
                 Example token:
                   value: "ya29.a0AcM612wPskMEKLkLGXQbZRiH9iRDOARWXgjarCtI1_e7-rCY-kkmLIZA3PRyQx8NS5mEmrcpOnUOaHjCkCHIN0IT0QfXWU7EQn-CGwMZyRQS3f2rJvx6FlKWrDIOL1vfVScFIoEDau-JUJL_eeuzhSMPgA7JPs0jDpVIaCgYKAS4SARESFQHGC6MilFzG-JsGTtQgtRCmQPIigQ0171"
@@ -587,7 +587,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
   /users/{userId}:
     get:
       description: "Retrieves the user"
@@ -596,7 +596,7 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "200":
           description: "OK"
@@ -609,7 +609,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
 
   /users/{userId}/wishes:
     get:
@@ -656,7 +656,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
   /wishes/{id}:
     delete:
       description: "Deletes the wish"
@@ -665,20 +665,20 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "401":
           description: "Unauthorized"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "404":
           description: "Not Found"
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
         "200":
           description: "The number of wishes deleted"
           content:
@@ -693,7 +693,7 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "200":
           description: "OK"
@@ -706,7 +706,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
     patch:
       description: "Updates the wish"
       parameters:
@@ -714,7 +714,7 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       requestBody:
         content:
           application/json:
@@ -733,7 +733,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: "object"
+                type: object
   /wishes/occasion:
     get:
       security: []
@@ -746,7 +746,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  type: "string"
+                  type: string
   /wishes/status:
     get:
       security: []
@@ -759,7 +759,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  type: "string"
+                  type: string
   /app/login/google:
     post:
       description: "After the user has logged in through the app via Google, this endpoint is used add the user to the API."
@@ -776,6 +776,35 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/User"
+  /app/login/email:
+    post:
+      description: "Entry point for logging in with email. If code is present in body, then will try to authenticate with OTP. Otherwise, will initiate OTP."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailLogin"
+        required: true
+      responses:
+        "200":
+          description: "Will contain user if code is present in request. Otherwise, will respond 'OTP sent'."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAndSession"
+        '400':
+          description: Bad Request, e.g., too many OTP attempts.
+          content:
+            text/plain:
+              example: "Too many attempts"
+
+        '401':
+          description: Unauthorized, invalid OTP.
+        '500':
+          description: Internal Server Error, e.g., user exists but no valid token found.
+          content:
+            text/plain:
+              example: "User exists, but no valid token found for user"
 
   /confirmInvite/{inviteId}:
     get:
@@ -785,14 +814,14 @@ paths:
         in: "path"
         required: true
         schema:
-          type: "string"
+          type: string
       responses:
         "302":
           description: "Redirect to login"
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
 
   /login:
     get:
@@ -805,10 +834,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: "object"
+              type: object
               properties:
                 image:
-                  type: "string"
+                  type: string
                   format: "binary"
         required: true
       responses:
@@ -817,19 +846,19 @@ paths:
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
         "400":
           description: "Bad request, possibly due to missing image file"
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
         "401":
           description: "Unauthorized"
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
 
   /images/{id}:
     get:
@@ -839,21 +868,21 @@ paths:
           in: "path"
           required: true
           schema:
-            type: "string"
+            type: string
       responses:
         "200":
           description: "OK"
           content:
             application/octet-stream:
               schema:
-                type: "string"
+                type: string
                 format: "binary"
         "404":
           description: "Image not found"
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
 
     delete:
       description: "Deletes an image by ID"
@@ -862,7 +891,7 @@ paths:
           in: "path"
           required: true
           schema:
-            type: "string"
+            type: string
       responses:
         "200":
           description: "Rows deleted"
@@ -876,39 +905,58 @@ paths:
           content:
             text/plain:
               schema:
-                type: "string"
+                type: string
 
 components:
   schemas:
     User:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
           format: "uuid"
         firstName:
-          type: "string"
+          type: string
         lastName:
-          type: "string"
+          type: string
         email:
-          type: "string"
+          type: string
       required:
       - "id"
-      - "firstName"
-      - "lastName"
       - "email"
+    UserSession:
+      type: object
+      properties:
+        status:
+          type: string
+          example: authenticated
+          description: Status of the session, e.g., "authenticated".
+        authToken:
+          type: string
+          description: Authentication token for the session.
+    UserAndSession:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        session:
+          $ref: "#/components/schemas/UserSession"
+      required:
+        - user
+        - session
+
     Group:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
           format: "uuid"
         name:
-          type: "string"
+          type: string
         createdBy:
           $ref: "#/components/schemas/User"
         visibility:
-          type: "string"
+          type: string
           enum:
           - "PRIVATE"
           - "PUBLIC"
@@ -919,26 +967,26 @@ components:
       - "createdBy"
       - "visibility"
     PartialGroup:
-      type: "object"
+      type: object
       properties:
         name:
-          type: "string"
+          type: string
         visibility:
-          type: "string"
+          type: string
     GroupMembership:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
           format: "uuid"
         groupId:
-          type: "string"
+          type: string
           format: "uuid"
         userId:
-          type: "string"
+          type: string
           format: "uuid"
         role:
-          type: "string"
+          type: string
           enum:
           - "OWNER"
           - "ADMIN"
@@ -950,40 +998,40 @@ components:
       - "userId"
       - "role"
     URLProtocol:
-      type: "object"
+      type: object
       properties:
         name:
-          type: "string"
+          type: string
         defaultPort:
           type: "integer"
           format: "int32"
       required:
       - "name"
     Parameters:
-      type: "object"
+      type: object
       properties: {}
     Url:
-      type: "object"
+      type: object
       properties:
         protocol:
           $ref: "#/components/schemas/URLProtocol"
         host:
-          type: "string"
+          type: string
         specifiedPort:
           type: "integer"
           format: "int32"
         pathSegments:
           type: "array"
           items:
-            type: "string"
+            type: string
         parameters:
           $ref: "#/components/schemas/Parameters"
         fragment:
-          type: "string"
+          type: string
         user:
-          type: "string"
+          type: string
         password:
-          type: "string"
+          type: string
         trailingQuery:
           type: "boolean"
       required:
@@ -993,16 +1041,16 @@ components:
       - "parameters"
       - "fragment"
     Wish:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
           format: "uuid"
         userId:
-          type: "string"
+          type: string
           format: "uuid"
         occasion:
-          type: "string"
+          type: string
           enum:
           - "BIRTHDAY"
           - "CHRISTMAS"
@@ -1010,22 +1058,22 @@ components:
           - "GRADUATION"
           - "NONE"
         status:
-          type: "string"
+          type: string
           enum:
           - "OPEN"
           - "SELECTED"
           - "FULFILLED"
           - "DELETED"
         url:
-          type: "string"
+          type: string
         description:
-          type: "string"
+          type: string
         title:
-          type: "string"
+          type: string
         img:
-          type: "string"
+          type: string
         visibility:
-          type: "string"
+          type: string
           enum:
           - "PRIVATE"
           - "PUBLIC"
@@ -1038,64 +1086,75 @@ components:
       - "visibility"
       - "title"
     PartialWish:
-      type: "object"
+      type: object
       properties:
         occasion:
-          type: "string"
+          type: string
         url:
-          type: "string"
+          type: string
         title:
-          type: "string"
+          type: string
         description:
-          type: "string"
+          type: string
         status:
-          type: "string"
+          type: string
         img:
-          type: "string"
+          type: string
         visibility:
-          type: "string"
+          type: string
         groupId:
-          type: "string"
+          type: string
       required:
         - title
     PartialWishForGroup:
-      type: "object"
+      type: object
       properties:
         occasion:
-          type: "string"
+          type: string
         url:
-          type: "string"
+          type: string
         title:
-          type: "string"
+          type: string
         description:
-          type: "string"
+          type: string
         status:
-          type: "string"
+          type: string
         img:
-          type: "string"
+          type: string
       required:
         - title
     GoogleAppUser:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
         displayName:
-          type: "string"
+          type: string
         email:
-          type: "string"
+          type: string
         photoUrl:
-          type: "string"
+          type: string
         serverAuthCode:
-          type: "string"
+          type: string
         accessToken:
-          type: "string"
+          type: string
       required:
       - "id"
       - "displayName"
       - "email"
       - "photoUrl"
       - "accessToken"
+    EmailLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: integer
+          format: int32
+      required:
+        - email
 
   securitySchemes:
     bearerAuth:

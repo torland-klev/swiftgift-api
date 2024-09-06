@@ -124,15 +124,24 @@ fun Application.configureSecurity(
             }
             post("/email") {
                 val content = call.receive<EmailLogin>()
-                if (content.code == null) {
-                    otpService.generateAndSendOTP(content.email)
-                    call.respond(HttpStatusCode.OK)
-                } else if (otpService.isValid(content)) {
-                    val user = userService.getUserByEmail(content.email)
-                    if (user != null) {
-                        call.respond(HttpStatusCode.OK, user)
+                val (email, code) = content
+                if (code == null) {
+                    if (otpService.hasMoreThanThreeValid(email)) {
+                        call.respond(HttpStatusCode.BadRequest, "Too many attempts")
                     } else {
-                        call.respond(HttpStatusCode.NotFound)
+                        otpService.generateAndSendOTP(email)
+                        call.respond(HttpStatusCode.OK, "OTP sent")
+                    }
+                } else if (otpService.isValid(content)) {
+                    val user = userService.getUserByEmail(email) ?: userService.createEmailUser(email)
+
+                    val authToken = userService.getAuthTokenIfExistingUser(user)
+                    if (authToken != null) {
+                        val userAndSession = UserAndSession(user = user, session = UserSession("authenticated", authToken))
+                        call.sessions.set(userAndSession)
+                        call.respond(HttpStatusCode.OK, userAndSession)
+                    } else {
+                        call.respond(HttpStatusCode.InternalServerError, "User exists, but no valid token found for user")
                     }
                 } else {
                     call.respond(HttpStatusCode.Unauthorized)

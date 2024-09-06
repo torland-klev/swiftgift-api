@@ -43,7 +43,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("io.ktor:ktor-server-swagger")
 
-    implementation("com.sun.mail:javax.mail:1.6.2")
+    implementation("com.auth0:java-jwt:4.4.0")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
