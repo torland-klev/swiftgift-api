@@ -2,6 +2,7 @@ package klev.db.users
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import klev.oauthUserId
 import klev.routeId
@@ -37,6 +38,17 @@ class UserRoutes(
     suspend fun me(call: ApplicationCall) {
         userService.read(call.oauthUserId())?.let {
             call.respond(HttpStatusCode.OK, it)
+        } ?: call.respond(HttpStatusCode.NotFound)
+    }
+
+    suspend fun updateById(call: ApplicationCall) {
+        userService.read(call.oauthUserId())?.let {
+            val partial = call.receive<PartialUser>()
+            if (userService.update(it.id, partial) > 0) {
+                call.respond(HttpStatusCode.OK, userService.read(it.id)!!)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
         } ?: call.respond(HttpStatusCode.NotFound)
     }
 }

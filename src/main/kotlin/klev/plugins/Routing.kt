@@ -11,6 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import klev.db.groups.GroupsRoutes
@@ -55,8 +56,13 @@ fun Application.configureRouting(
             }
         }
         authenticate("auth-bearer") {
-            get("/me") {
-                userRoutes.me(call)
+            route("/me") {
+                get {
+                    userRoutes.me(call)
+                }
+                put {
+                    userRoutes.updateById(call)
+                }
             }
             route("/groups") {
                 get {

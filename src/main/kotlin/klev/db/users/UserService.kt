@@ -221,4 +221,18 @@ class UserService(
         }
         return newUser
     }
+
+    suspend fun update(
+        id: UUID,
+        partial: PartialUser,
+    ) = read(id)?.let { user ->
+        dbQuery {
+            Users.update({ Users.id eq id }) {
+                it[firstName] = partial.firstName ?: user.firstName
+                it[lastName] = partial.lastName ?: user.lastName
+                it[email] = partial.email ?: user.email
+                it[updated] = CurrentTimestamp()
+            }
+        }
+    } ?: 0
 }

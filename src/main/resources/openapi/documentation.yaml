@@ -99,6 +99,26 @@ paths:
             '*/*':
               schema:
                 type: object
+    put:
+      description: "Update the currently logged in user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartialUser"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: "User could not be found"
+          content:
+            '*/*':
+              schema:
+                type: object
 
   /groups:
     get:
@@ -1155,6 +1175,16 @@ components:
           format: int32
       required:
         - email
+    PartialUser:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
 
   securitySchemes:
     bearerAuth:
