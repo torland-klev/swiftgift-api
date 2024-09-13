@@ -594,7 +594,7 @@ paths:
                   value: "ya29.a0AcM612wPskMEKLkLGXQbZRiH9iRDOARWXgjarCtI1_e7-rCY-kkmLIZA3PRyQx8NS5mEmrcpOnUOaHjCkCHIN0IT0QfXWU7EQn-CGwMZyRQS3f2rJvx6FlKWrDIOL1vfVScFIoEDau-JUJL_eeuzhSMPgA7JPs0jDpVIaCgYKAS4SARESFQHGC6MilFzG-JsGTtQgtRCmQPIigQ0171"
   /users:
     get:
-      description: "Retrieves the currently logged in user"
+      description: "Retrieves al public users. A user is considered public if it has a first- or last name set."
       responses:
         "200":
           description: "OK"

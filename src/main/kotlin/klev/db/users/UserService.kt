@@ -17,6 +17,7 @@ import klev.env
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
 import org.jetbrains.exposed.sql.select
@@ -235,4 +236,16 @@ class UserService(
             }
         }
     } ?: 0
+
+    suspend fun allPublic() =
+        dbQuery {
+            Users.select { (Users.firstName neq null) and (Users.lastName neq null) }.map {
+                User(
+                    id = it[Users.id].value,
+                    firstName = it[Users.firstName],
+                    lastName = it[Users.lastName],
+                    email = it[Users.email],
+                )
+            }
+        }
 }

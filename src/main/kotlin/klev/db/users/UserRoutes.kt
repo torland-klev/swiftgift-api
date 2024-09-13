@@ -13,9 +13,7 @@ class UserRoutes(
     suspend fun get(call: ApplicationCall) {
         val id = call.oauthUserId()
         if (id != null) {
-            userService.read(id)?.let {
-                call.respond(HttpStatusCode.OK, it)
-            } ?: call.respond(HttpStatusCode.NotFound)
+            call.respond(HttpStatusCode.OK, userService.allPublic())
         } else {
             call.respond(HttpStatusCode.NotFound)
         }
