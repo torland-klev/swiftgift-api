@@ -1,6 +1,7 @@
 package klev.db.auth
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -29,6 +30,9 @@ class OneTimePasswordEmailService(
                 headers {
                     contentType(ContentType.Application.Json)
                     bearerAuth(env("EMAIL_API_TOKEN"))
+                }
+                timeout {
+                    requestTimeoutMillis = 20_000
                 }
                 setBody(
                     """{

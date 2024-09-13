@@ -63,8 +63,8 @@ class OneTimePasswordService(
     suspend fun generateAndSendOTP(email: String) {
         val oneTimePassword = OneTimePassword(email = email)
         deleteAllInvalidForEmail(email)
-        create(oneTimePassword)
         emailService.sendOneTimePassword(oneTimePassword.email, oneTimePassword.code)
+        create(oneTimePassword)
     }
 
     suspend fun isValid(content: EmailLogin) =

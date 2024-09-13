@@ -3,6 +3,7 @@ package klev
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -45,6 +46,7 @@ fun env(key: String): String = System.getenv(key) ?: dotenv[key]
 
 val applicationHttpClient =
     HttpClient(CIO) {
+        install(HttpTimeout)
         install(ContentNegotiation) {
             json()
         }
