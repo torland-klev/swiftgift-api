@@ -40,9 +40,7 @@ fun main() {
         .start(wait = true)
 }
 
-private val dotenv = dotenv()
-
-fun env(key: String): String = System.getenv(key) ?: dotenv[key]
+fun env(key: String): String = System.getenv(key) ?: dotenv()[key]
 
 val applicationHttpClient =
     HttpClient(CIO) {
