@@ -1,9 +1,7 @@
 package klev
 
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.html.respondHtml
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.server.routing.RoutingContext
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.div
@@ -15,7 +13,7 @@ import kotlinx.html.style
 import kotlinx.html.title
 import kotlinx.html.unsafe
 
-suspend fun PipelineContext<Unit, ApplicationCall>.mainHtml() =
+suspend fun RoutingContext.mainHtml() =
     call.respondHtml {
         head {
             meta(charset = "UTF-8")
