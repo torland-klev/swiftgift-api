@@ -1,5 +1,6 @@
 package klev.db.users
 
+import klev.plugins.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
@@ -15,6 +16,7 @@ data class UserAndSession(
     val session: UserSession,
 )
 
+@Serializable
 data class InviteData(
-    val inviteId: UUID,
+    @Serializable(with = UUIDSerializer::class) val inviteId: UUID,
 )
