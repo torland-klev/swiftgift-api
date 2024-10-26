@@ -250,6 +250,29 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Group"
+  /groups/{groupId}/role:
+    get:
+      description: "Get the role in group of current user."
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: string
+      responses:
+        "404":
+          description: "Current user is not a member of group"
+          content:
+            '*/*':
+              schema:
+                type: object
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupMembership"
+
   /groups/{groupId}/invite:
     post:
       description: "Creates an invite for the group. The invite must be handled by initiating party."

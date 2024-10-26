@@ -83,6 +83,9 @@ fun Application.configureRouting(
                     post("/invite") {
                         groupsRoutes.inviteIfAdmin(call)
                     }
+                    get("/role") {
+                        groupsRoutes.getRoleInGroup(call)
+                    }
                     route("/members") {
                         get {
                             groupMembershipRoutes.allByGroup(call)

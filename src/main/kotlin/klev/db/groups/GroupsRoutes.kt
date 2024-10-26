@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingCall
 import klev.db.groups.invitations.InvitationService
 import klev.db.groups.memberships.GroupMembershipService
 import klev.db.users.UserService
@@ -148,6 +149,21 @@ class GroupsRoutes(
             call.respond(HttpStatusCode.Unauthorized)
         } else {
             call.respond(HttpStatusCode.OK, wishesService.allByGroup(userId = memberId, groupId = groupId))
+        }
+    }
+
+    suspend fun getRoleInGroup(call: RoutingCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        if (userId == null || groupId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else {
+            val membership = groupMembershipService.byGroupAndUser(groupId, userId)
+            if (membership == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+            } else {
+                call.respond(HttpStatusCode.OK, membership.role.name)
+            }
         }
     }
 }
