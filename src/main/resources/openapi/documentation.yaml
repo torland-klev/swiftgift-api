@@ -363,7 +363,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: "userId"
+      - name: "memberId"
         in: "path"
         required: true
         schema:
@@ -390,6 +390,29 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GroupMembership"
+  /groups/{groupId}/members/{memberId}/wishes:
+    get:
+      description: "Retrieved wishes made public to a given group by a given member"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: string
+        - name: "memberId"
+          in: "path"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Wish"
   /groups/{groupId}/members/admins:
     get:
       description: "Retrieves all members with administrator privileges for the group"
@@ -644,6 +667,18 @@ paths:
                 items:
                   $ref: "#/components/schemas/Wish"
 
+  /users/{userId}/groups:
+    get:
+      description: "Retrieves all groups that user is affiliated with."
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Group"
   /wishes:
     get:
       description: "Retrieves all wishes that (a) is public, (b) is created by user, or (c) the user has access to through a group membership."

@@ -90,6 +90,9 @@ fun Application.configureRouting(
                         get("/{memberId}") {
                             groupMembershipRoutes.get(call)
                         }
+                        get("/{memberId}/wishes") {
+                            groupsRoutes.wishesForMember(call)
+                        }
                         delete("/{memberId}") {
                             groupMembershipRoutes.deleteIfCanAdmin(call)
                         }
@@ -132,6 +135,11 @@ fun Application.configureRouting(
                     route("/wishes") {
                         get {
                             wishesRoutes.allUserHasCreated(call)
+                        }
+                    }
+                    route("/groups") {
+                        get {
+                            groupMembershipRoutes.allByUser(call)
                         }
                     }
                 }

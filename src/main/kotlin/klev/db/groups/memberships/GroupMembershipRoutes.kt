@@ -3,6 +3,7 @@ package klev.db.groups.memberships
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingCall
 import klev.db.groups.GroupService
 import klev.db.users.UserService
 import klev.oauthUserId
@@ -162,5 +163,19 @@ class GroupMembershipRoutes(
 
     suspend fun removeAsAdmin(call: ApplicationCall) {
         setRoleIfAdmin(call, GroupMembershipRole.MEMBER)
+    }
+
+    suspend fun allByUser(call: RoutingCall) {
+        val callerId = call.oauthUserId()
+        val userId = call.routeId("userId")
+        if (callerId == null || userId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else if (callerId == userId) {
+            call.respond(HttpStatusCode.OK, groupMembershipService.allOwnedByUser(userId = userId))
+        } else {
+            val callees = groupMembershipService.allOwnedByUser(userId = callerId)
+            val users = groupMembershipService.allOwnedByUser(userId = userId)
+            call.respond(HttpStatusCode.OK, callees.filter { it.groupId in users.map { membership -> membership.groupId } })
+        }
     }
 }

@@ -136,4 +136,18 @@ class GroupsRoutes(
             call.respond(HttpStatusCode.OK, wishesService.allByGroup(userId = userId, groupId = groupId))
         }
     }
+
+    suspend fun wishesForMember(call: ApplicationCall) {
+        val userId = call.oauthUserId()
+        val groupId = call.routeId("groupId")
+        val memberId = call.routeId("memberId")
+        val user = userService.read(userId)
+        if (user == null || groupId == null) {
+            call.respond(HttpStatusCode.NotFound)
+        } else if (!groupMembershipService.isMember(userId!!, groupId)) {
+            call.respond(HttpStatusCode.Unauthorized)
+        } else {
+            call.respond(HttpStatusCode.OK, wishesService.allByGroup(userId = memberId, groupId = groupId))
+        }
+    }
 }
