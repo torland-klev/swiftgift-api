@@ -7,7 +7,6 @@ import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -18,7 +17,6 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import java.util.UUID
 
-@OptIn(ExperimentalSerializationApi::class)
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json(

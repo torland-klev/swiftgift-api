@@ -4,11 +4,13 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import klev.db.groups.groupsToWishes.GroupsToWishesService
 import klev.oauthUserId
 import klev.routeId
 
 class WishesRoutes(
     private val wishesService: WishesService,
+    private val groupsToWishesService: GroupsToWishesService,
 ) {
     suspend fun patch(call: ApplicationCall) {
         val id = call.routeId()
@@ -95,5 +97,21 @@ class WishesRoutes(
                 call.respond(HttpStatusCode.OK, wishes.toSet())
             }
         }
+    }
+
+    suspend fun getGroupsForWish(call: ApplicationCall) {
+        call.oauthUserId()?.let { userId ->
+            val found =
+                wishesService.read(
+                    id = call.routeId(),
+                    userId = call.oauthUserId(),
+                )
+            if (found != null) {
+                val groupIds = groupsToWishesService.allByWish(found.id)
+                call.respond(HttpStatusCode.OK, groupIds.map { it.groupId.toString() })
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        } ?: call.respond(HttpStatusCode.Unauthorized)
     }
 }

@@ -6,6 +6,7 @@ import klev.db.groups.groupsToWishes.GroupsToWishes.wishId
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
@@ -41,5 +42,15 @@ class GroupsToWishesService(
     suspend fun allByGroup(groupId: UUID) =
         dbQuery {
             GroupsToWishes.select(GroupsToWishes.groupId eq groupId).map { readMap(it) }
+        }
+
+    suspend fun allByWish(wishId: UUID) =
+        dbQuery {
+            GroupsToWishes.select(GroupsToWishes.wishId eq wishId).map { readMap(it) }
+        }
+
+    suspend fun deleteAllForWish(wishId: UUID) =
+        dbQuery {
+            GroupsToWishes.deleteWhere { GroupsToWishes.wishId eq wishId }
         }
 }

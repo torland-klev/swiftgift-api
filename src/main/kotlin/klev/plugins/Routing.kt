@@ -164,6 +164,11 @@ fun Application.configureRouting(
                     patch {
                         wishesRoutes.patch(call)
                     }
+                    route("/groups") {
+                        get {
+                            wishesRoutes.getGroupsForWish(call)
+                        }
+                    }
                 }
             }
             route("/images") {

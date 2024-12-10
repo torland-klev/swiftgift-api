@@ -123,7 +123,7 @@ fun Application.module() {
                 wishesService = wishesService,
             ),
         userRoutes = UserRoutes(userService = userService),
-        wishesRoutes = WishesRoutes(wishesService = wishesService),
+        wishesRoutes = WishesRoutes(groupsToWishesService = groupsToWishesService, wishesService = wishesService),
         groupMembershipRoutes =
             GroupMembershipRoutes(
                 groupService = groupService,

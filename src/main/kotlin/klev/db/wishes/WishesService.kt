@@ -85,19 +85,35 @@ class WishesService(
             val occasion = partial.occasion?.let { Occasion.valueOf(it.uppercase()) }
             val status = partial.status?.let { Status.valueOf(it.uppercase()) }
             val visibility = partial.visibility?.let { WishVisibility.valueOf(it.uppercase()) }
-            update(
-                id,
-                userId,
-                existing.copy(
-                    occasion = occasion ?: existing.occasion,
-                    status = status ?: existing.status,
-                    url = partial.url ?: existing.url,
-                    description = partial.description ?: existing.description,
-                    img = partial.img ?: existing.img,
-                    visibility = visibility ?: existing.visibility,
-                    title = partial.title ?: existing.title,
-                ),
-            )
+            val wish =
+                update(
+                    id,
+                    userId,
+                    existing.copy(
+                        occasion = occasion ?: existing.occasion,
+                        status = status ?: existing.status,
+                        url = partial.url ?: existing.url,
+                        description = partial.description ?: existing.description,
+                        img = partial.img ?: existing.img,
+                        visibility = visibility ?: existing.visibility,
+                        title = partial.title ?: existing.title,
+                    ),
+                )
+
+            try {
+                val groupId = UUID.fromString(partial.groupId)
+                val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
+                if (group != null) {
+                    groupsToWishesService.deleteAllForWish(wishId = wish!!.id)
+                    groupsToWishesService.create(GroupToWish(groupId = groupId, wishId = wish.id))
+                }
+            } catch (e: IllegalArgumentException) {
+                // Ignore
+            } catch (e: NullPointerException) {
+                // Ignore
+            }
+
+            return wish
         }
     }
 

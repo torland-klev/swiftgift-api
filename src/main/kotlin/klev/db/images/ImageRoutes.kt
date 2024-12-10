@@ -4,16 +4,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import io.ktor.utils.io.readRemaining
 import klev.db.users.UserAndSession
 import klev.oauthUserId
 import klev.routeId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 
 class ImageRoutes(
@@ -42,7 +43,7 @@ class ImageRoutes(
                         contentType = part.contentType
                         val byteArray =
                             withContext(Dispatchers.IO) {
-                                part.streamProvider().readBytes()
+                                part.provider().readRemaining().readByteArray()
                             }
                         imageBlob = ExposedBlob(byteArray)
                         part.dispose()
