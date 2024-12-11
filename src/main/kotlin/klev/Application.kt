@@ -88,6 +88,7 @@ private val wishesService =
         groupsToWishesService = groupsToWishesService,
         groupMembershipService = groupMembershipService,
         groupService = groupService,
+        imageService = imageService,
     )
 
 fun ApplicationCall.oauthUserId() =

@@ -5,6 +5,7 @@ import klev.db.groups.GroupService
 import klev.db.groups.groupsToWishes.GroupToWish
 import klev.db.groups.groupsToWishes.GroupsToWishesService
 import klev.db.groups.memberships.GroupMembershipService
+import klev.db.images.ImageService
 import klev.db.wishes.Wishes.description
 import klev.db.wishes.Wishes.img
 import klev.db.wishes.Wishes.occasion
@@ -26,6 +27,7 @@ class WishesService(
     private val groupsToWishesService: GroupsToWishesService,
     private val groupMembershipService: GroupMembershipService,
     private val groupService: GroupService,
+    private val imageService: ImageService,
 ) : UserCRUD<Wish>(database, Wishes) {
     override fun createMap(
         statement: InsertStatement<Number>,
@@ -101,6 +103,10 @@ class WishesService(
                 )
 
             try {
+                if (existing.img != null && wish?.img != existing.img) {
+                    imageService.delete(userId = userId, id = UUID.fromString(existing.img))
+                }
+
                 val groupId = UUID.fromString(partial.groupId)
                 val group = groupService.getIfHasReadAccess(groupId = groupId, userId = userId)
                 if (group != null) {

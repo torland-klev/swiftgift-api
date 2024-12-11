@@ -812,6 +812,31 @@ paths:
             '*/*':
               schema:
                 type: object
+  /wishes/{id}/groups:
+    get:
+      description: "Retrieves the ID's of any group that the wish is part of"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: object
+
   /wishes/occasion:
     get:
       security: []
